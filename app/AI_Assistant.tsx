@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function SOSScreen() {
-    console.log('SOSScreen Rendered');
+export default function AI_AssistantScreen() {
+    console.log('AI_AssistantScreen Rendered');
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>SOS Screen - Under Construction</Text>
+      <Text style={styles.text}>AI Assistant - Coming Soon!</Text>
     </View>
   );
 }

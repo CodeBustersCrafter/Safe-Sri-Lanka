@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function SOSScreen() {
-    console.log('SOSScreen Rendered');
+export default function FakeCallScreen() {
+  console.log('FakeCallScreen Rendered');
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>SOS Screen - Under Construction</Text>
+      <Text style={styles.text}>Fake Call Screen - Under Construction</Text>
     </View>
   );
 }
