@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Link } from 'expo-router';
+import AddRecordingButton from '../../components/AddRecordingButton';
 
 export default function FakeCallScreen() {
   console.log('FakeCallScreen Rendered');
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Fake Call Screen - Under Construction</Text>
+      <Text style={styles.text}>Fake Call Screen</Text>
+      <Link href="/RecordingsManager" asChild>
+        <AddRecordingButton />
+      </Link>
     </View>
   );
 }
@@ -18,6 +23,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginBottom: 20
   }
 });

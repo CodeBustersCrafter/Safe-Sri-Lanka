@@ -1,78 +1,40 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
+import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import TabBarIcon from '@/components/navigation/TabBarIcon';
 
-export default function TabsLayout() {
-  console.log('TabsLayout Rendered'); // Log when TabsLayout is rendered
-  const colorSchemeMode = useColorScheme();
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        tabBarActiveTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
-        tabBarStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
-        headerShown: false,
+        headerStyle: {
+          backgroundColor: colorScheme === 'dark' ? '#000' : '#fff',
+        },
+        headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
       }}
     >
-      {/* Map Tab */}
-      <Tabs.Screen
-        name="Map"
+      <Stack.Screen
+        name="index"
         options={{
-          title: 'Map',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering Map Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'map' : 'map-outline'} color={color} />;
-          },
+          title: 'Home',
         }}
       />
-
-      {/* Helpline Tab */}
-      <Tabs.Screen
-        name="Helpline"
+      <Stack.Screen
+        name="(tabs)"
         options={{
-          title: 'Helpline',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering Helpline Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'call' : 'call-outline'} color={color} />;
-          },
+          headerShown: false,
         }}
       />
-      {/* SOS Tab */}
-      <Tabs.Screen
-        name="SOS"
+      <Stack.Screen
+        name="RecordingsManager"
         options={{
-          title: 'SOS',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering SOS Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'alert-circle' : 'alert-circle-outline'} color={color} />;
-          },
+          title: 'Recordings',
         }}
       />
-      
-      {/* Fake Call Tab */}
-      <Tabs.Screen
-        name="FakeCall"
-        options={{
-          title: 'Fake Call',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering FakeCall Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'phone-portrait' : 'phone-portrait-outline'} color={color} />;
-          },
-        }}
-      />
-
-      {/* AI Assistant Tab */}
-      <Tabs.Screen
-        name="AI_Assistant"
-        options={{
-          title: 'AI Assistant',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering AI_Assistant Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />;
-          },
-        }}
-      />
-    </Tabs>
+    </Stack>
   );
 }

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Button, Text } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { startLocationTracking, getCurrentLocation } from '../services/LocationService';
-import { sendLocationToServer } from '../services/ApiService';
+import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
+import { sendLocationToServer } from '../../services/ApiService';
+
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
