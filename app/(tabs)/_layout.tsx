@@ -12,7 +12,7 @@ export default function TabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
         tabBarStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
-        headerShown: false,
+        headerShown: true,
       }}
     >
       {/* Map Tab */}

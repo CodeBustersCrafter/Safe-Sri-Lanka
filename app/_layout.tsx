@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
+import TopBar from '../components/TopBar';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -15,6 +16,7 @@ export default function RootLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        header: () => <TopBar />,
       }}
     >
       <Stack.Screen
@@ -26,13 +28,25 @@ export default function RootLayout() {
       <Stack.Screen
         name="(tabs)"
         options={{
-          headerShown: false,
+          headerShown: true,
         }}
       />
       <Stack.Screen
         name="RecordingsManager"
         options={{
           title: 'Recordings',
+        }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{
+          title: 'Notifications',
+        }}
+      />
+      <Stack.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
         }}
       />
     </Stack>
