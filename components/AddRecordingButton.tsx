@@ -1,20 +1,13 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-interface AddRecordingButtonProps {
-  onPress: () => void;
-  isRecording?: boolean;
-}
-
-const AddRecordingButton: React.FC<AddRecordingButtonProps> = ({ onPress, isRecording }) => {
+const AddRecordingButton = forwardRef<TouchableOpacity, any>((props, ref) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>
-        {isRecording ? 'Stop Recording' : 'Add Recording'}
-      </Text>
+    <TouchableOpacity ref={ref} style={styles.button} {...props}>
+      <Text style={styles.text}>Add Recording</Text>
     </TouchableOpacity>
   );
-};
+});
 
 const styles = StyleSheet.create({
   button: {
@@ -22,9 +15,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  buttonText: {
+  text: {
     color: 'white',
-    fontSize: 16,
     fontWeight: 'bold',
   },
 });

@@ -1,48 +1,79 @@
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-let recording: Audio.Recording | null = null;
+const RECORDINGS_DIRECTORY = `${FileSystem.documentDirectory}recordings/`;
+const SELECTED_RECORDING_KEY = 'selectedRecording';
+
+let recording = null;
 
 export const startRecording = async () => {
   try {
+    console.log('Requesting permissions..');
+    await Audio.requestPermissionsAsync();
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
     });
+    console.log('Starting recording..');
     const { recording: newRecording } = await Audio.Recording.createAsync(
       Audio.RecordingOptionsPresets.HIGH_QUALITY
     );
     recording = newRecording;
+    console.log('Recording started');
   } catch (err) {
     console.error('Failed to start recording', err);
   }
 };
 
 export const stopRecording = async () => {
+  console.log('Stopping recording..');
   if (!recording) {
+    console.log('No active recording');
     return null;
   }
-  try {
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    recording = null;
-    return uri;
-  } catch (err) {
-    console.error('Failed to stop recording', err);
-  }
+  await recording.stopAndUnloadAsync();
+  const uri = recording.getURI();
+  console.log('Recording stopped and stored at', uri);
+  recording = null;
+  await saveRecording(uri);
+  return uri;
+};
+
+const saveRecording = async (uri) => {
+  const fileName = `recording-${Date.now()}.m4a`;
+  const newUri = `${RECORDINGS_DIRECTORY}${fileName}`;
+  await FileSystem.makeDirectoryAsync(RECORDINGS_DIRECTORY, { intermediates: true });
+  await FileSystem.moveAsync({
+    from: uri,
+    to: newUri,
+  });
+  console.log('Recording saved to', newUri);
 };
 
 export const getRecordings = async () => {
-  const recordingsDirectory = `${FileSystem.documentDirectory}recordings/`;
-  const directoryInfo = await FileSystem.getInfoAsync(recordingsDirectory);
+  console.log('Getting recordings..');
+  const directoryInfo = await FileSystem.getInfoAsync(RECORDINGS_DIRECTORY);
   if (!directoryInfo.exists) {
-    await FileSystem.makeDirectoryAsync(recordingsDirectory);
+    console.log('Recordings directory does not exist');
     return [];
   }
 
-  const recordings = await FileSystem.readDirectoryAsync(recordingsDirectory);
+  const recordings = await FileSystem.readDirectoryAsync(RECORDINGS_DIRECTORY);
+  console.log('Found recordings:', recordings);
   return recordings.map((fileName, index) => ({
-    uri: `${recordingsDirectory}${fileName}`,
+    uri: `${RECORDINGS_DIRECTORY}${fileName}`,
     name: `Recording ${index + 1}`,
   }));
+};
+
+export const setSelectedRecording = async (recording) => {
+  await AsyncStorage.setItem(SELECTED_RECORDING_KEY, JSON.stringify(recording));
+  console.log('Selected recording set:', recording);
+};
+
+export const getSelectedRecording = async () => {
+  const selectedRecording = await AsyncStorage.getItem(SELECTED_RECORDING_KEY);
+  console.log('Retrieved selected recording:', selectedRecording);
+  return selectedRecording ? JSON.parse(selectedRecording) : null;
 };

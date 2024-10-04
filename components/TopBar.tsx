@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4a4a4a',
-    fontFamily: 'Arial-BoldMT', // You can change this to a custom font if desired
+    fontFamily: 'System',  // Changed from 'Arial-BoldMT' to 'System'
   },
   buttonContainer: {
     flexDirection: 'row',
