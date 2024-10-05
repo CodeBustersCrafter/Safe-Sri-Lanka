@@ -1,18 +1,19 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useColorScheme } from 'react-native';
-import TabBarIcon from '@/components/navigation/TabBarIcon';
+import { useColorScheme, Text, StyleSheet } from 'react-native';
 
 export default function TabsLayout() {
-  console.log('TabsLayout Rendered'); // Log when TabsLayout is rendered
   const colorSchemeMode = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
+        tabBarInactiveTintColor: colorSchemeMode === 'dark' ? '#888' : '#666',
         tabBarStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
-        headerShown: true,
+        headerShown: false,
+        headerStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
+        headerTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
       }}
     >
       {/* Map Tab */}
@@ -20,10 +21,11 @@ export default function TabsLayout() {
         name="Map"
         options={{
           title: 'Map',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering Map Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'map' : 'map-outline'} color={color} />;
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
+              {focused ? '🌍' : '🗺️'}
+            </Text>
+          ),
         }}
       />
 
@@ -32,10 +34,11 @@ export default function TabsLayout() {
         name="Helpline"
         options={{
           title: 'Helpline',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering Helpline Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'call' : 'call-outline'} color={color} />;
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
+              {focused ? '☎️' : '📞'}
+            </Text>
+          ),
         }}
       />
       
@@ -44,10 +47,11 @@ export default function TabsLayout() {
         name="SOS"
         options={{
           title: 'SOS',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering SOS Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'alert-circle' : 'alert-circle-outline'} color={color} />;
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text style={[styles.emoji, focused && styles.activeEmoji, styles.sosEmoji]}>
+              🆘
+            </Text>
+          ),
         }}
       />
       
@@ -56,10 +60,11 @@ export default function TabsLayout() {
         name="FakeCall"
         options={{
           title: 'Fake Call',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering FakeCall Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'phone-portrait' : 'phone-portrait-outline'} color={color} />;
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
+              {focused ? '📱' : '🚫📞'}
+            </Text>
+          ),
         }}
       />
 
@@ -68,12 +73,25 @@ export default function TabsLayout() {
         name="AI_Assistant"
         options={{
           title: 'AI Assistant',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('Rendering AI_Assistant Tab Icon'); // Log icon rendering
-            return <TabBarIcon name={focused ? 'chatbubbles' : 'chatbubbles-outline'} color={color} />;
-          },
+          tabBarIcon: ({ focused }) => (
+            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
+              {focused ? '🤖' : '💬'}
+            </Text>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  emoji: {
+    fontSize: 24,
+  },
+  activeEmoji: {
+    fontSize: 28,
+  },
+  sosEmoji: {
+    fontWeight: 'bold',
+  },
+});
