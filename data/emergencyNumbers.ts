@@ -6,7 +6,7 @@ export interface EmergencyNumber {
   }
   
   export const emergencyNumbers: EmergencyNumber[] = [
-    { id: '1', emoji: '🚨', title: 'Emergency Services', number: '911' },
+    { id: '1', emoji: '🚨', title: 'Samples are shown below', number: '911' },
     { id: '2', emoji: '🚑', title: 'Ambulance', number: '102' },
     { id: '3', emoji: '🚒', title: 'Fire Department', number: '101' },
     { id: '4', emoji: '👮', title: 'Police', number: '100' },
