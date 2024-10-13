@@ -5,8 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const RECORDINGS_DIRECTORY = `${FileSystem.documentDirectory}recordings/`;
 const SELECTED_RECORDING_KEY = 'selectedRecording';
 
-let recording = null;
+let recording: Audio.Recording | null = null;
 
+// Function to start recording
 export const startRecording = async () => {
   try {
     console.log('Requesting permissions..');
@@ -17,7 +18,7 @@ export const startRecording = async () => {
     });
     console.log('Starting recording..');
     const { recording: newRecording } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY
+      Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
     );
     recording = newRecording;
     console.log('Recording started');
@@ -26,6 +27,7 @@ export const startRecording = async () => {
   }
 };
 
+// Function to stop recording
 export const stopRecording = async () => {
   console.log('Stopping recording..');
   if (!recording) {
@@ -40,7 +42,8 @@ export const stopRecording = async () => {
   return uri;
 };
 
-const saveRecording = async (uri) => {
+// Function to save the recording to the recordings directory
+const saveRecording = async (uri: string) => {
   const fileName = `recording-${Date.now()}.m4a`;
   const newUri = `${RECORDINGS_DIRECTORY}${fileName}`;
   await FileSystem.makeDirectoryAsync(RECORDINGS_DIRECTORY, { intermediates: true });
@@ -51,6 +54,7 @@ const saveRecording = async (uri) => {
   console.log('Recording saved to', newUri);
 };
 
+// Function to get all recordings
 export const getRecordings = async () => {
   console.log('Getting recordings..');
   const directoryInfo = await FileSystem.getInfoAsync(RECORDINGS_DIRECTORY);
@@ -67,11 +71,13 @@ export const getRecordings = async () => {
   }));
 };
 
+// Function to set the selected recording
 export const setSelectedRecording = async (recording) => {
   await AsyncStorage.setItem(SELECTED_RECORDING_KEY, JSON.stringify(recording));
   console.log('Selected recording set:', recording);
 };
 
+// Function to get the selected recording
 export const getSelectedRecording = async () => {
   const selectedRecording = await AsyncStorage.getItem(SELECTED_RECORDING_KEY);
   console.log('Retrieved selected recording:', selectedRecording);

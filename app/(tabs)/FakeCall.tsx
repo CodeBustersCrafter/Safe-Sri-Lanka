@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Link, useFocusEffect } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,10 +8,13 @@ import { Ionicons } from '@expo/vector-icons';
 import AddRecordingButton from '../../components/AddRecordingButton';
 import { getSelectedRecording } from '../../services/AudioService';
 import { initiateFakeCall, stopFakeCall } from '../../services/FakeCallService';
+import FakeCallModal from '../../components/FakeCallModal';
 
 export default function FakeCallScreen() {
   const [selectedRecording, setSelectedRecording] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [callerName, setCallerName] = useState('John Doe'); // You can randomize or set dynamically
 
   useEffect(() => {
     requestPermissions();
@@ -43,11 +46,11 @@ export default function FakeCallScreen() {
         finalStatus = status;
       }
       if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
+        alert('Failed to get notification permissions!');
         return;
       }
     } else {
-      alert('Must use physical device for Push Notifications');
+      alert('Must use a physical device for notifications');
     }
   };
 
@@ -57,18 +60,31 @@ export default function FakeCallScreen() {
     setSelectedRecording(recording);
   };
 
-  const handleGetFakeCall = () => {
+  const handleGetFakeCall = async () => {
     if (selectedRecording) {
-      initiateFakeCall(selectedRecording);
-      setIsCallActive(true);
+      const randomName = getRandomCallerName();
+      setCallerName(randomName);
+      console.log('Initiating fake call...');
+      await initiateFakeCall(selectedRecording);
+      setIsModalVisible(true);
     } else {
       alert('Please select a recording first');
     }
   };
 
-  const handleStopCall = async () => {
-    await stopFakeCall();
-    setIsCallActive(false);
+  const handleAcceptCall = async () => {
+    console.log('Call accepted');
+    setIsModalVisible(false);
+    setIsCallActive(true);
+    Alert.alert('Call Answered', 'Playing your recording');
+    // The recording playback is handled in FakeCallService
+  };
+
+  const handleDeclineCall = () => {
+    console.log('Call declined');
+    setIsModalVisible(false);
+    stopFakeCall();
+    Alert.alert('Call Declined', 'You have declined the call.');
   };
 
   const handleNotificationResponse = (response) => {
@@ -76,35 +92,34 @@ export default function FakeCallScreen() {
     setIsCallActive(true);
   };
 
+  const getRandomCallerName = () => {
+    const callerNames = ['Alice', 'Bob', 'Charlie', 'Diana', 'Ethan'];
+    return callerNames[Math.floor(Math.random() * callerNames.length)];
+  };
+
+  const handleStopCall = async () => {
+    await stopFakeCall();
+    setIsCallActive(false);
+    Alert.alert('Call Ended', 'You have ended the call.');
+  };
+
   return (
     <LinearGradient
-      colors={['#f0f0f0', '#e0e0e0']}
+      colors={['#e0f7fa', '#80deea']}
       style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
-      <Text style={styles.title}>Fake Call Screen</Text>
-      <Link href="/RecordingsManager" asChild>
-        <AddRecordingButton />
-      </Link>
-      <View style={styles.spacer} />
-      {!isCallActive ? (
-        <TouchableOpacity onPress={handleGetFakeCall}>
-          <LinearGradient
-            colors={['#4c669f', '#3b5998', '#192f6a']}
-            style={styles.button}
-          >
-            <Ionicons name="call" size={24} color="white" />
-            <Text style={styles.buttonText}>Get Fake Call</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity onPress={handleStopCall}>
-          <LinearGradient
-            colors={['#ff4b4b', '#ff0000']}
-            style={styles.button}
-          >
-            <Ionicons name="close-circle" size={24} color="white" />
-            <Text style={styles.buttonText}>Stop Call</Text>
-          </LinearGradient>
+      <Text style={styles.title}>Fake Call Simulator</Text>
+      <AddRecordingButton />
+      <TouchableOpacity style={styles.button} onPress={handleGetFakeCall}>
+        <Ionicons name="call-outline" size={24} color="white" />
+        <Text style={styles.buttonText}>Get Fake Call</Text>
+      </TouchableOpacity>
+      {isCallActive && (
+        <TouchableOpacity style={[styles.button, styles.stopButton]} onPress={handleStopCall}>
+          <Ionicons name="call-sharp" size={24} color="white" />
+          <Text style={styles.buttonText}>Stop Call</Text>
         </TouchableOpacity>
       )}
       {selectedRecording && (
@@ -113,6 +128,12 @@ export default function FakeCallScreen() {
           <Text style={styles.selectedRecording}>{selectedRecording.name}</Text>
         </View>
       )}
+      <FakeCallModal
+        isVisible={isModalVisible}
+        callerName={callerName}
+        onAccept={handleAcceptCall}
+        onDecline={handleDeclineCall}
+      />
     </LinearGradient>
   );
 }
@@ -120,9 +141,9 @@ export default function FakeCallScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   title: {
     fontSize: 28,
@@ -133,13 +154,11 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  spacer: {
-    height: 30,
-  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#00796B',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 25,
@@ -148,6 +167,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    marginTop: 15,
+  },
+  stopButton: {
+    backgroundColor: '#D32F2F',
   },
   buttonText: {
     color: 'white',
