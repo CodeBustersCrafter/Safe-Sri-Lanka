@@ -44,7 +44,8 @@
     "expo-notifications": "~0.28.18",
     "expo-device": "~6.0.2",
     "expo-task-manager": "~11.8.2",
-    "expo-linear-gradient": "~13.0.2"
+    "expo-linear-gradient": "~13.0.2",
+    "expo-image-picker": "~15.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
