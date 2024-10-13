@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,10 +11,11 @@ import { initiateFakeCall, stopFakeCall } from '../../services/FakeCallService';
 import FakeCallModal from '../../components/FakeCallModal';
 
 export default function FakeCallScreen() {
-  const [selectedRecording, setSelectedRecording] = useState(null);
+  const [selectedRecording, setSelectedRecording] = useState<{ uri: string; name: string } | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [callerName, setCallerName] = useState('John Doe'); // You can randomize or set dynamically
+  const [callerName, setCallerName] = useState('John Doe');
+  const router = useRouter();
 
   useEffect(() => {
     requestPermissions();
@@ -87,7 +88,7 @@ export default function FakeCallScreen() {
     Alert.alert('Call Declined', 'You have declined the call.');
   };
 
-  const handleNotificationResponse = (response) => {
+  const handleNotificationResponse = (response: any) => {
     console.log('Notification response received');
     setIsCallActive(true);
   };
@@ -103,6 +104,11 @@ export default function FakeCallScreen() {
     Alert.alert('Call Ended', 'You have ended the call.');
   };
 
+  // Handler for navigating to RecordingsManager
+  const handleAddRecording = () => {
+    router.push('/RecordingsManager');
+  };
+
   return (
     <LinearGradient
       colors={['#e0f7fa', '#80deea']}
@@ -111,23 +117,33 @@ export default function FakeCallScreen() {
       end={{ x: 1, y: 1 }}
     >
       <Text style={styles.title}>Fake Call Simulator</Text>
-      <AddRecordingButton />
+      
+      {/* Add Recording Button */}
+      <AddRecordingButton onPress={handleAddRecording} isRecording={false} />
+
+      {/* Simulate Incoming Call Button */}
       <TouchableOpacity style={styles.button} onPress={handleGetFakeCall}>
         <Ionicons name="call-outline" size={24} color="white" />
         <Text style={styles.buttonText}>Get Fake Call</Text>
       </TouchableOpacity>
+
+      {/* Stop Call Button */}
       {isCallActive && (
         <TouchableOpacity style={[styles.button, styles.stopButton]} onPress={handleStopCall}>
           <Ionicons name="call-sharp" size={24} color="white" />
           <Text style={styles.buttonText}>Stop Call</Text>
         </TouchableOpacity>
       )}
+
+      {/* Selected Recording Display */}
       {selectedRecording && (
         <View style={styles.recordingCard}>
           <Text style={styles.recordingCardTitle}>Selected Recording:</Text>
           <Text style={styles.selectedRecording}>{selectedRecording.name}</Text>
         </View>
       )}
+
+      {/* Fake Call Modal */}
       <FakeCallModal
         isVisible={isModalVisible}
         callerName={callerName}

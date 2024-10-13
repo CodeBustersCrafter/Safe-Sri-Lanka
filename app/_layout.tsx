@@ -8,7 +8,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: 'black' }}>
     <Stack
       screenOptions={{
         headerStyle: {
