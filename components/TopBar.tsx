@@ -2,12 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TopBar = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.title}>Safe Sri Lanka</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={() => router.push('/notifications')} style={styles.button}>
@@ -36,7 +38,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#4a4a4a',
-    fontFamily: 'System',  // Changed from 'Arial-BoldMT' to 'System'
+    fontFamily: 'System',
   },
   buttonContainer: {
     flexDirection: 'row',

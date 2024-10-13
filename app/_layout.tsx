@@ -2,11 +2,13 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import TopBar from '../components/TopBar';
+import { SafeAreaProvider } from 'react-native-safe-area-context'; // Ensure this line is present
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <SafeAreaProvider>
     <Stack
       screenOptions={{
         headerStyle: {
@@ -50,5 +52,6 @@ export default function RootLayout() {
         }}
       />
     </Stack>
+    </SafeAreaProvider>
   );
 }
