@@ -83,3 +83,53 @@ public function aiChat(json payload) returns json|error {
         return { "error": "Message is required" };
     }
 }
+
+// Define a structure for User Profile
+type UserProfile record {
+    string id;
+    string name;
+    string mobile;
+    string email;
+    string location;
+    string profileImage; // URL or base64 string
+};
+
+// In-memory storage for user profiles (Replace with MongoDB integration)
+map<UserProfile> userProfiles = {};
+
+// Function to update User Profile
+public function updateProfile(json payload) returns json|error {
+    string? id = payload["id"].toString(); // Assuming you pass a user ID
+    string? name = payload["name"].toString();
+    string? mobile = payload["mobile"].toString();
+    string? email = payload["email"].toString();
+    string? location = payload["location"].toString();
+    string? profileImage = payload["profileImage"].toString();
+
+    if (id is string && name is string && mobile is string && email is string && location is string) {
+        UserProfile profile = {
+            id: id,
+            name: name,
+            mobile: mobile,
+            email: email,
+            location: location,
+            profileImage: profileImage is string ? profileImage : ""
+        };
+
+        userProfiles[id] = profile;
+        log:printInfo("Profile updated for user: " + name);
+        return { "status": "success", "profile": profile };
+    } else {
+        return { "error": "Invalid profile data" };
+    }
+}
+
+// Function to get User Profile
+public function getProfile(string id) returns json|error {
+    UserProfile? profile = userProfiles[id];
+    if (profile is UserProfile) {
+        return profile;
+    } else {
+        return { "error": "Profile not found" };
+    }
+}

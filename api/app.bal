@@ -59,4 +59,20 @@ service /api on apiListener {
             }
         }
     }
+    // Profile Service
+    service /profile {
+        resource function post update(http:Request req) returns json|error {
+            var payload = req.getJsonPayload();
+            if (payload is json) {
+                return controllers:updateProfile(payload);
+            } else {
+                return { "error": "Invalid payload" };
+            }
+        }
+
+        resource function get getProfile(http:Request req, string id) returns json|error {
+            return controllers:getProfile(id);
+        }
+    }
 }
+
