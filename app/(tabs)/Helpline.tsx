@@ -32,6 +32,9 @@ export default function HelplineScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#000' : '#f0f0f0' }]}>
+      <Text style={[styles.header, { color: colorScheme === 'dark' ? '#fff' : '#000' }]} >
+        Emergency Helplines
+      </Text>
       <FlatList
         data={emergencyNumbers}
         renderItem={renderItem}
@@ -45,6 +48,12 @@ export default function HelplineScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 16,
   },
   listContainer: {
     padding: 16,
