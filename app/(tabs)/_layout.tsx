@@ -1,19 +1,34 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useColorScheme, Text, StyleSheet } from 'react-native';
+import { useColorScheme, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabsLayout() {
-  const colorSchemeMode = useColorScheme();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+
+  const getTabBarIcon = (name: string, color: string) => {
+    return ({ focused, size }: { focused: boolean; size: number }) => (
+      <Ionicons 
+        name={focused ? name : `${name}-outline`} 
+        size={size} 
+        color={focused ? color : (isDarkMode ? '#888' : '#8E8E93')} 
+      />
+    );
+  };
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
-        tabBarInactiveTintColor: colorSchemeMode === 'dark' ? '#888' : '#666',
-        tabBarStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
+        tabBarActiveTintColor: isDarkMode ? '#fff' : '#007AFF',
+        tabBarInactiveTintColor: isDarkMode ? '#888' : '#8E8E93',
+        tabBarStyle: { 
+          backgroundColor: isDarkMode ? '#1C1C1E' : '#F2F2F7',
+          borderTopColor: isDarkMode ? '#38383A' : '#C6C6C8',
+        },
         headerShown: false,
-        headerStyle: { backgroundColor: colorSchemeMode === 'dark' ? '#000' : '#fff' },
-        headerTintColor: colorSchemeMode === 'dark' ? '#fff' : '#000',
+        headerStyle: { backgroundColor: isDarkMode ? '#000' : '#fff' },
+        headerTintColor: isDarkMode ? '#fff' : '#000',
       }}
     >
       {/* Map Tab */}
@@ -21,11 +36,7 @@ export default function TabsLayout() {
         name="Map"
         options={{
           title: 'Map',
-          tabBarIcon: ({ focused }) => (
-            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
-              {focused ? '🌍' : '🗺️'}
-            </Text>
-          ),
+          tabBarIcon: getTabBarIcon('map', '#4CAF50'), // Green
         }}
       />
 
@@ -34,11 +45,7 @@ export default function TabsLayout() {
         name="Helpline"
         options={{
           title: 'Helpline',
-          tabBarIcon: ({ focused }) => (
-            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
-              {focused ? '☎️' : '📞'}
-            </Text>
-          ),
+          tabBarIcon: getTabBarIcon('call', '#2196F3'), // Blue
         }}
       />
       
@@ -48,7 +55,7 @@ export default function TabsLayout() {
         options={{
           title: 'SOS',
           tabBarIcon: ({ focused }) => (
-            <Text style={[styles.emoji, focused && styles.activeEmoji, styles.sosEmoji]}>
+            <Text style={{ fontSize: 24, color: focused ? '#FF9800' : (isDarkMode ? '#888' : '#8E8E93') }}>
               🆘
             </Text>
           ),
@@ -60,11 +67,7 @@ export default function TabsLayout() {
         name="FakeCall"
         options={{
           title: 'Fake Call',
-          tabBarIcon: ({ focused }) => (
-            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
-              {focused ? '📱' : '🚫📞'}
-            </Text>
-          ),
+          tabBarIcon: getTabBarIcon('phone-portrait', '#E91E63'), // Pink
         }}
       />
 
@@ -73,11 +76,7 @@ export default function TabsLayout() {
         name="AI_Assistant"
         options={{
           title: 'AI Assistant',
-          tabBarIcon: ({ focused }) => (
-            <Text style={[styles.emoji, focused && styles.activeEmoji]}>
-              {focused ? '🤖' : '💬'}
-            </Text>
-          ),
+          tabBarIcon: getTabBarIcon('chatbubble-ellipses', '#9C27B0'), // Purple
         }}
       />
     </Tabs>
@@ -85,13 +84,5 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  emoji: {
-    fontSize: 24,
-  },
-  activeEmoji: {
-    fontSize: 28,
-  },
-  sosEmoji: {
-    fontWeight: 'bold',
-  },
+  // You can add custom styles here if needed
 });
