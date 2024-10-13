@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Button, Text } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
 import { sendLocationToServer } from '../../services/ApiService';
+import { Ionicons } from '@expo/vector-icons';
 
+const { width, height } = Dimensions.get('window');
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -58,11 +60,16 @@ export default function MapScreen() {
           />
         </MapView>
       )}
-      <Button
-        title={isTracking ? "Tracking..." : "Track Me"}
-        onPress={startTracking}
-        disabled={isTracking}
-      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, isTracking && styles.trackingButton]}
+          onPress={startTracking}
+          disabled={isTracking}
+        >
+          <Ionicons name={isTracking ? "location" : "location-outline"} size={24} color="white" />
+          <Text style={styles.buttonText}>{isTracking ? "Tracking..." : "Track Me"}</Text>
+        </TouchableOpacity>
+      </View>
       {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
     </View>
   );
@@ -73,12 +80,44 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: '100%',
-    height: '90%',
+    width: width,
+    height: height,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.9)', // Semi-transparent green
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  trackingButton: {
+    backgroundColor: 'rgba(33, 150, 243, 0.9)', // Semi-transparent blue
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
   },
   errorText: {
+    position: 'absolute',
+    bottom: 80,
+    alignSelf: 'center',
     color: 'red',
-    textAlign: 'center',
-    marginTop: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 8,
+    borderRadius: 4,
   },
 });
