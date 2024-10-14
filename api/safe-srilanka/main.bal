@@ -1,5 +1,7 @@
 import ballerina/http;
 import safe_srilanka.controllers as controllers;
+import safe_srilanka.databaseController as databaseController;
+import ballerina/io;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -58,7 +60,7 @@ service /safe_srilanka/ai_assistant on apiListener {
     }
 }
 // Profile Service
-service /safe_srilanka/profile on apiListener {
+service /safe_srilanka/profileUpdate on apiListener {
     resource function post update(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -67,12 +69,32 @@ service /safe_srilanka/profile on apiListener {
             return { "error": "Invalid payload" };
         }
     }
-
-    resource function get getProfile(http:Request req, string id) returns json|error {
-        return controllers:getProfile(id);
+}
+service /safe_srilanka/profileGet on apiListener {
+    resource function get getProfile(http:Request req, string id) returns json|error  {
+        io:println(id);
+        io:println("get profile is called");
+        return databaseController:getUserProfile(id);
+    }
+}
+service /safe_srilanka/profilesGet on apiListener {
+    resource function get getProfiles(http:Request req) returns json|error  {
+        io:println("get profiles is called");
+        io:println("get profile is called");
+        return databaseController:getUserProfiles();
     }
 }
 
+service /safe_srilanka/profileAdd on apiListener {
+    resource function post addProfile(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            return databaseController:addProfile(payload);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+}
 public function main() returns error? {
     // Start the HTTP listener
     check apiListener.'start();

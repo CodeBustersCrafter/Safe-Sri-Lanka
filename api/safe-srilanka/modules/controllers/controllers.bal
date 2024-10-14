@@ -1,4 +1,5 @@
 import ballerina/log;
+import safe_srilanka.models as models;
 // Define a structure for Emergency Numbers
 type EmergencyNumber record {
     string id;
@@ -66,29 +67,19 @@ public function aiChat(json payload) returns json|error {
     return { "response": aiResponse };
 }
 
-// Define a structure for User Profile
-type UserProfile record {
-    string id;
-    string name;
-    string mobile;
-    string email;
-    string location;
-    string profileImage; // URL or base64 string
-};
-
 // In-memory storage for user profiles (Replace with MongoDB integration)
-map<UserProfile> userProfiles = {};
+map<models:UserProfile> userProfiles = {};
 
 // Function to update User Profile
 public function updateProfile(json payload) returns json|error {
-    string id = check payload.id.ensureType();
+    int id = check payload.id.ensureType();
     string name = check payload.name.ensureType();
     string mobile = check payload.mobile.ensureType();
     string email = check payload.email.ensureType();
     string location = check payload.location.ensureType();
     string profileImage = check payload.profileImage.ensureType();
 
-    UserProfile profile = {
+    models:UserProfile profile = {
         id,
         name,
         mobile,
@@ -97,17 +88,7 @@ public function updateProfile(json payload) returns json|error {
         profileImage: profileImage
     };
 
-    userProfiles[id] = profile;
+    userProfiles[id.toString()] = profile;
     log:printInfo("Profile updated for user: " + name);
     return { "status": "success", "profile": profile}.toJson();
-}
-
-// Function to get User Profile
-public function getProfile(string id) returns json|error {
-    UserProfile? profile = userProfiles[id];
-    if (profile is UserProfile) {
-        return profile.toJson();
-    } else {
-        return { "error": "Profile not found" };
-    }
 }
