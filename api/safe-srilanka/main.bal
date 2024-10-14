@@ -60,7 +60,7 @@ service /safe_srilanka/ai_assistant on apiListener {
     }
 }
 // Profile Service
-service /safe_srilanka/profile on apiListener {
+service /safe_srilanka/database/profile on apiListener {
     resource function post update(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -105,7 +105,7 @@ service /safe_srilanka/profile on apiListener {
 
 
 // Insert trace
-service /safe_srilanka/trace on apiListener {
+service /safe_srilanka/database/trace on apiListener {
     resource function post insert(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -119,7 +119,7 @@ service /safe_srilanka/trace on apiListener {
 }
 
 // Insert danger zone
-service /safe_srilanka/dangerZone on apiListener {
+service /safe_srilanka/database/dangerZone on apiListener {
     resource function post insert(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -135,7 +135,7 @@ service /safe_srilanka/dangerZone on apiListener {
 }
 
 // Insert current location
-service /safe_srilanka/currentLocation on apiListener {
+service /safe_srilanka/database/currentLocation on apiListener {
     resource function post insert(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -162,7 +162,7 @@ service /safe_srilanka/currentLocation on apiListener {
 }
 
 // Insert relationship
-service /safe_srilanka/relationship on apiListener {
+service /safe_srilanka/database/relationship on apiListener {
     resource function post insert(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
