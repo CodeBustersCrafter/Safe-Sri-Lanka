@@ -18,7 +18,7 @@ export const startRecording = async () => {
     });
     console.log('Starting recording..');
     const { recording: newRecording } = await Audio.Recording.createAsync(
-      Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      Audio.RecordingOptionsPresets.HIGH_QUALITY
     );
     recording = newRecording;
     console.log('Recording started');
@@ -38,8 +38,11 @@ export const stopRecording = async () => {
   const uri = recording.getURI();
   console.log('Recording stopped and stored at', uri);
   recording = null;
-  await saveRecording(uri);
-  return uri;
+  if (uri) {
+    await saveRecording(uri);
+    return uri;
+  }
+  return null;
 };
 
 // Function to save the recording to the recordings directory
@@ -72,7 +75,7 @@ export const getRecordings = async () => {
 };
 
 // Function to set the selected recording
-export const setSelectedRecording = async (recording) => {
+export const setSelectedRecording = async (recording: { uri: string; name: string }) => {
   await AsyncStorage.setItem(SELECTED_RECORDING_KEY, JSON.stringify(recording));
   console.log('Selected recording set:', recording);
 };

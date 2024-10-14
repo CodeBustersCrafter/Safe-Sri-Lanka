@@ -9,18 +9,24 @@ import AddRecordingButton from '../../components/AddRecordingButton';
 import { getSelectedRecording } from '../../services/AudioService';
 import { initiateFakeCall, stopFakeCall } from '../../services/FakeCallService';
 import FakeCallModal from '../../components/FakeCallModal';
+import CallActiveModal from '../../components/CallActiveModal'; // Imported CallActiveModal
 
 export default function FakeCallScreen() {
   const [selectedRecording, setSelectedRecording] = useState<{ uri: string; name: string } | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [callerName, setCallerName] = useState('John Doe');
+  const [callDuration, setCallDuration] = useState(0);
   const router = useRouter();
+  let callTimer: NodeJS.Timeout;
 
   useEffect(() => {
     requestPermissions();
     const subscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      clearInterval(callTimer);
+    };
   }, []);
 
   useFocusEffect(
@@ -30,6 +36,7 @@ export default function FakeCallScreen() {
   );
 
   const requestPermissions = async () => {
+    // Notification Permissions
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'default',
@@ -53,6 +60,19 @@ export default function FakeCallScreen() {
     } else {
       alert('Must use a physical device for notifications');
     }
+
+    // Audio Permissions
+    const { status } = await Notifications.requestPermissionsAsync(); // Reusing Notifications for simplicity
+    if (status !== 'granted') {
+      alert('Failed to get audio permissions!');
+    }
+
+    // Configure Audio to play in silent mode
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: true,
+      shouldDuckAndroid: false,
+    });
   };
 
   const loadSelectedRecording = async () => {
@@ -78,6 +98,12 @@ export default function FakeCallScreen() {
     setIsModalVisible(false);
     setIsCallActive(true);
     Alert.alert('Call Answered', 'Playing your recording');
+
+    // Start Call Duration Timer
+    callTimer = setInterval(() => {
+      setCallDuration((prev) => prev + 1);
+    }, 1000);
+
     // The recording playback is handled in FakeCallService
   };
 
@@ -88,6 +114,14 @@ export default function FakeCallScreen() {
     Alert.alert('Call Declined', 'You have declined the call.');
   };
 
+  const handleEndCall = async () => {
+    await stopFakeCall();
+    setIsCallActive(false);
+    setCallDuration(0);
+    Alert.alert('Call Ended', 'You have ended the call.');
+    clearInterval(callTimer);
+  };
+
   const handleNotificationResponse = (response: any) => {
     console.log('Notification response received');
     setIsCallActive(true);
@@ -96,12 +130,6 @@ export default function FakeCallScreen() {
   const getRandomCallerName = () => {
     const callerNames = ['Alice', 'Bob', 'Charlie', 'Diana', 'Ethan'];
     return callerNames[Math.floor(Math.random() * callerNames.length)];
-  };
-
-  const handleStopCall = async () => {
-    await stopFakeCall();
-    setIsCallActive(false);
-    Alert.alert('Call Ended', 'You have ended the call.');
   };
 
   // Handler for navigating to RecordingsManager
@@ -129,9 +157,9 @@ export default function FakeCallScreen() {
 
       {/* Stop Call Button */}
       {isCallActive && (
-        <TouchableOpacity style={[styles.button, styles.stopButton]} onPress={handleStopCall}>
+        <TouchableOpacity style={[styles.button, styles.stopButton]} onPress={handleEndCall}>
           <Ionicons name="call-sharp" size={24} color="white" />
-          <Text style={styles.buttonText}>Stop Call</Text>
+          <Text style={styles.buttonText}>End Call</Text>
         </TouchableOpacity>
       )}
 
@@ -149,6 +177,15 @@ export default function FakeCallScreen() {
         callerName={callerName}
         onAccept={handleAcceptCall}
         onDecline={handleDeclineCall}
+      />
+
+      {/* Call Active Modal */}
+      <CallActiveModal
+        isVisible={isCallActive}
+        callDuration={callDuration}
+        onEndCall={handleEndCall}
+        onMute={() => console.log('Mute pressed')} // Implement mute functionality as needed
+        onAddCall={() => console.log('Add Call pressed')} // Implement add call functionality as needed
       />
     </LinearGradient>
   );
