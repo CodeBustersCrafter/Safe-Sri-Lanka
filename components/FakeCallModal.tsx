@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,7 @@ const FakeCallModal: React.FC<FakeCallModalProps> = ({
   onAccept,
   onDecline,
 }) => {
-  let ringtone: Audio.Sound | undefined;
+  const ringtoneRef = useRef<Audio.Sound | null>(null); // Use ref to maintain ringtone instance
 
   const insets = useSafeAreaInsets();
 
@@ -28,29 +28,36 @@ const FakeCallModal: React.FC<FakeCallModalProps> = ({
     }
 
     return () => {
-      if (ringtone) {
-        ringtone
-          .stopAsync()
-          .then(() => ringtone.unloadAsync())
-          .catch((e) => console.log('Error stopping/unloading ringtone:', e));
-      }
+      stopAndUnloadRingtone();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   const playRingtone = async () => {
-    ringtone = new Audio.Sound();
     try {
+      ringtoneRef.current = new Audio.Sound();
       const ringtoneSource = require('../assets/ringtones/default_ringtone.mp3');
 
       // Log the ringtone source to verify it's not undefined
       console.log('Ringtone Source:', ringtoneSource);
 
-      await ringtone.loadAsync(ringtoneSource);
-      await ringtone.setIsLoopingAsync(true);
-      await ringtone.playAsync();
+      await ringtoneRef.current.loadAsync(ringtoneSource);
+      await ringtoneRef.current.setIsLoopingAsync(true);
+      await ringtoneRef.current.playAsync();
     } catch (error) {
       console.log('Error playing ringtone:', error);
+    }
+  };
+
+  const stopAndUnloadRingtone = async () => {
+    if (ringtoneRef.current) {
+      try {
+        await ringtoneRef.current.stopAsync();
+        await ringtoneRef.current.unloadAsync();
+        ringtoneRef.current = null;
+      } catch (e) {
+        console.log('Error stopping/unloading ringtone:', e);
+      }
     }
   };
 
@@ -77,20 +84,20 @@ const FakeCallModal: React.FC<FakeCallModalProps> = ({
 
 const styles = StyleSheet.create({
   modal: {
-    justifyContent: 'flex-end',
+    justifyContent: 'center', // Center the modal vertically
+    alignItems: 'center', // Center the modal horizontally
     margin: 0,
   },
   container: {
     backgroundColor: 'white',
-    padding: 22,
+    padding: 30,
     alignItems: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: 300,
+    borderRadius: 20,
+    width: '80%', // Adjust width as needed
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   callerName: {
