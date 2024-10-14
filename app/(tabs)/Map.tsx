@@ -12,12 +12,14 @@ export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
+  const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const currentLocation = await getCurrentLocation();
         setLocation(currentLocation);
+        fetchCity(currentLocation.coords);
       } catch (error) {
         setErrorMsg('Failed to get current location');
         console.error(error);
@@ -25,12 +27,28 @@ export default function MapScreen() {
     })();
   }, []);
 
+  const fetchCity = async (coords: Location.LocationCoords) => {
+    try {
+      const reverseGeocode = await Location.reverseGeocodeAsync(coords);
+      if (reverseGeocode.length > 0) {
+        const { city } = reverseGeocode[0];
+        setCity(city);
+      } else {
+        setCity('Unknown');
+      }
+    } catch (error) {
+      console.error('Failed to fetch city name:', error);
+      setCity('Unknown');
+    }
+  };
+
   const startTracking = async () => {
     setIsTracking(true);
     try {
       await startLocationTracking((newLocation) => {
         setLocation(newLocation);
         sendLocationToServer(newLocation);
+        fetchCity(newLocation.coords);
       });
     } catch (error) {
       setErrorMsg('Failed to start tracking');
@@ -60,6 +78,12 @@ export default function MapScreen() {
           />
         </MapView>
       )}
+      {city && (
+        <View style={styles.cityCard}>
+          <Ionicons name="location-sharp" size={20} color="black" style={styles.cityIcon} />
+          <Text style={styles.cityText}>You are currently in {city}</Text>
+        </View>
+      )}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isTracking && styles.trackingButton]}
@@ -82,6 +106,33 @@ const styles = StyleSheet.create({
   map: {
     width: width,
     height: height,
+  },
+  cityCard: {
+    position: 'absolute',
+    top: 40,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'gold',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'black',
+    // Simulating double border by adding an outer border and inner content padding
+    // Since React Native doesn't support double borders directly
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  cityIcon: {
+    marginRight: 8,
+  },
+  cityText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonContainer: {
     position: 'absolute',
