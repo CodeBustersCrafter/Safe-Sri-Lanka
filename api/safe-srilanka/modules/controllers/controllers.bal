@@ -75,6 +75,7 @@ public function updateProfile(json payload) returns json|error {
     int id = check payload.id.ensureType();
     string name = check payload.name.ensureType();
     string mobile = check payload.mobile.ensureType();
+    string whatsapp = check payload.whatsapp.ensureType();
     string email = check payload.email.ensureType();
     string location = check payload.location.ensureType();
     string profileImage = check payload.profileImage.ensureType();
@@ -83,6 +84,7 @@ public function updateProfile(json payload) returns json|error {
         id,
         name,
         mobile,
+        whatsapp,
         email,
         location,
         profileImage: profileImage

@@ -60,7 +60,7 @@ service /safe_srilanka/ai_assistant on apiListener {
     }
 }
 // Profile Service
-service /safe_srilanka/profileUpdate on apiListener {
+service /safe_srilanka/profile on apiListener {
     resource function post update(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -69,23 +69,16 @@ service /safe_srilanka/profileUpdate on apiListener {
             return { "error": "Invalid payload" };
         }
     }
-}
-service /safe_srilanka/profileGet on apiListener {
     resource function get getProfile(http:Request req, string id) returns json|error  {
         io:println(id);
         io:println("get profile is called");
         return databaseController:getUserProfile(id);
     }
-}
-service /safe_srilanka/profilesGet on apiListener {
     resource function get getProfiles(http:Request req) returns json|error  {
         io:println("get profiles is called");
         io:println("get profile is called");
         return databaseController:getUserProfiles();
     }
-}
-
-service /safe_srilanka/profileAdd on apiListener {
     resource function post addProfile(http:Request req) returns json|error {
         var payload = req.getJsonPayload();
         if (payload is json) {
@@ -94,7 +87,107 @@ service /safe_srilanka/profileAdd on apiListener {
             return { "error": "Invalid payload" };
         }
     }
+
+    resource function put update(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int id = check payload.id.ensureType();
+            return databaseController:updateProfile(id, payload);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+
+    resource function delete remove(http:Request req, int id) returns json|error {
+        return databaseController:deleteProfile(id);
+    }
 }
+
+
+// Insert trace
+service /safe_srilanka/trace on apiListener {
+    resource function post insert(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int id = check payload.id.ensureType();
+            string location = check payload.location.ensureType();
+            return databaseController:insertTrace(id, location);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+// Insert danger zone
+service /safe_srilanka/dangerZone on apiListener {
+    resource function post insert(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int id = check payload.id.ensureType();
+            decimal lat = check payload.lat.ensureType();
+            decimal lon = check payload.lon.ensureType();
+            string description = check payload.description.ensureType();
+            return databaseController:insertDangerZone(id, lat, lon, description);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+// Insert current location
+service /safe_srilanka/currentLocation on apiListener {
+    resource function post insert(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int id = check payload.id.ensureType();
+            decimal lat = check payload.lat.ensureType();
+            decimal lon = check payload.lon.ensureType();
+            return databaseController:insertCurrentLocation(id, lat, lon);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+
+    resource function put update(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int id = check payload.id.ensureType();
+            decimal lat = check payload.lat.ensureType();
+            decimal lon = check payload.lon.ensureType();
+            return databaseController:updateCurrentLocation(id, lat, lon);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+// Insert relationship
+service /safe_srilanka/relationship on apiListener {
+    resource function post insert(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int user1 = check payload.user1.ensureType();
+            int user2 = check payload.user2.ensureType();
+            return databaseController:insertRelationship(user1, user2);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+
+    resource function put update(http:Request req) returns json|error {
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int user1 = check payload.user1.ensureType();
+            int user2 = check payload.user2.ensureType();
+            int newUser2 = check payload.newUser2.ensureType();
+            return databaseController:updateRelationship(user1, user2, newUser2);
+        } else {
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+
 public function main() returns error? {
     // Start the HTTP listener
     check apiListener.'start();

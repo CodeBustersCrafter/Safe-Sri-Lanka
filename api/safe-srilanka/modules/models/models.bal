@@ -7,6 +7,8 @@ public type UserProfile record {|
     string name;
     @sql:Column {name : "mobile"}
     string mobile;
+    @sql:Column {name : "whatsapp"}
+    string whatsapp;
     @sql:Column {name : "email"}
     string email;
     @sql:Column {name : "location"}
