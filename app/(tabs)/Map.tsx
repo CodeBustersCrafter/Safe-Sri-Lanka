@@ -19,7 +19,7 @@ export default function MapScreen() {
       try {
         const currentLocation = await getCurrentLocation();
         setLocation(currentLocation);
-        fetchCity(currentLocation.coords);
+        fetchCity(currentLocation);
       } catch (error) {
         setErrorMsg('Failed to get current location');
         console.error(error);
@@ -27,9 +27,9 @@ export default function MapScreen() {
     })();
   }, []);
 
-  const fetchCity = async (coords: Location.LocationCoords) => {
+  const fetchCity = async (coords: Location.LocationObject) => {
     try {
-      const reverseGeocode = await Location.reverseGeocodeAsync(coords);
+      const reverseGeocode = await Location.reverseGeocodeAsync(coords.coords);
       if (reverseGeocode.length > 0) {
         const { city } = reverseGeocode[0];
         setCity(city);
@@ -48,7 +48,7 @@ export default function MapScreen() {
       await startLocationTracking((newLocation) => {
         setLocation(newLocation);
         sendLocationToServer(newLocation);
-        fetchCity(newLocation.coords);
+        fetchCity(newLocation);
       });
     } catch (error) {
       setErrorMsg('Failed to start tracking');

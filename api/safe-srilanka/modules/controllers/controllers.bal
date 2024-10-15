@@ -1,5 +1,6 @@
 import ballerina/log;
 import safe_srilanka.models as models;
+import safe_srilanka.aiChatBot as aiChatBot;
 // Define a structure for Emergency Numbers
 type EmergencyNumber record {
     string id;
@@ -62,9 +63,9 @@ public function addRecording(json payload) returns json|error {
 public function aiChat(json payload) returns json|error {
     string message = check payload.message.ensureType();
     // Simulate AI chatbot response
-    string aiResponse = "You said: " + message;
-    log:printInfo("AI Chat received message: " + message);
-    return { "response": aiResponse };
+    //string aiResponse = "You said: " + message;
+    //log:printInfo("AI Chat received message: " + message);
+    return aiChatBot:chatWithAI(message);
 }
 
 // In-memory storage for user profiles (Replace with MongoDB integration)

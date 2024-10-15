@@ -1,10 +1,22 @@
-# Returns the string `Hello` with the input string name.
-#
-# + name - name as a string or nil
-# + return - "Hello, " with the input string name
-public function hello(string? name) returns string {
-    if name !is () {
-        return string `Hello, ${name}`;
+import ballerina/http;
+import ballerina/io;
+
+configurable string pythonServiceUrl = "http://localhost:8000";
+
+public function chatWithAI(string message) returns json|error {
+    http:Client pythonClient = check new (pythonServiceUrl);
+
+    json payload = {
+        "message": message
+    };
+
+    http:Response response = check pythonClient->post("/chat", payload);
+    io:println(response);
+    if (response.statusCode == 200) {
+        json responsePayload = check response.getJsonPayload();
+        return responsePayload;
+    } else {
+        io:println("Error from Python service: " + response.statusCode.toString());
+        return error("Failed to get response from Python service");
     }
-    return "Hello, World!";
 }
