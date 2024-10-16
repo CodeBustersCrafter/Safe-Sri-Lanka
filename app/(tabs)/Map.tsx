@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
-import { sendLocationToServer } from '../../services/ApiService';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
@@ -11,8 +10,9 @@ const { width, height } = Dimensions.get('window');
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isTracking, setIsTracking] = useState(false);
   const [city, setCity] = useState<string | null>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -42,20 +42,31 @@ export default function MapScreen() {
     }
   };
 
-  const startTracking = async () => {
-    setIsTracking(true);
-    try {
-      await startLocationTracking((newLocation) => {
-        setLocation(newLocation);
-        sendLocationToServer(newLocation);
-        fetchCity(newLocation);
-      });
-    } catch (error) {
-      setErrorMsg('Failed to start tracking');
-      setIsTracking(false);
-      console.error(error);
-    }
-  };
+  const updateLocation = useCallback((newLocation: Location.LocationObject) => {
+    setLocation(newLocation);
+    fetchCity(newLocation);
+  }, []);
+
+  const toggleTracking = useCallback(() => {
+    setIsTracking((prevIsTracking) => {
+      if (prevIsTracking) {
+        console.log("Stopping tracking");
+        if (trackingIntervalRef.current) {
+          clearInterval(trackingIntervalRef.current);
+          trackingIntervalRef.current = null;
+        }
+        console.log("Tracking stopped");
+      } else {
+        console.log("Starting tracking");
+        startLocationTracking(updateLocation);
+        trackingIntervalRef.current = setInterval(() => {
+          console.log("Tracking");
+          startLocationTracking(updateLocation);
+        }, 10000); // for 10 seconds
+      }
+      return !prevIsTracking;
+    });
+  }, [updateLocation]);
 
   return (
     <View style={styles.container}>
@@ -87,11 +98,10 @@ export default function MapScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isTracking && styles.trackingButton]}
-          onPress={startTracking}
-          disabled={isTracking}
+          onPress={toggleTracking}
         >
           <Ionicons name={isTracking ? "location" : "location-outline"} size={24} color="white" />
-          <Text style={styles.buttonText}>{isTracking ? "Tracking..." : "Track Me"}</Text>
+          <Text style={styles.buttonText}>{isTracking ? "Stop Tracking" : "Track Me"}</Text>
         </TouchableOpacity>
       </View>
       {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
@@ -118,8 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: 'black',
-    // Simulating double border by adding an outer border and inner content padding
-    // Since React Native doesn't support double borders directly
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
