@@ -3,7 +3,6 @@ import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-nati
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
-import { sendLocationToServer } from '../../services/ApiService';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
