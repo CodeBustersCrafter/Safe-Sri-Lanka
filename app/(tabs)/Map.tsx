@@ -1,13 +1,31 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions, Alert, Image } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getNearbyDangerZones } from '../apiCalls/dangerZoneApi';
+import { getNearbyFriends } from '../apiCalls/friendsApi';
 
 const { width, height } = Dimensions.get('window');
+
+interface DangerZone {
+  id: number;
+  lat: number;
+  lon: number;
+  description: string;
+  distance: number;
+}
+
+interface Friend {
+  id: number;
+  name: string;
+  profileImage: string;
+  lat: number;
+  lon: number;
+  distance: number;
+}
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -17,14 +35,8 @@ export default function MapScreen() {
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [dangerZones, setDangerZones] = useState<DangerZone[]>([]);
   const [isDangerZoneMode, setIsDangerZoneMode] = useState(false);
-
-  interface DangerZone {
-    id: number;
-    lat: number;
-    lon: number;
-    description: string;
-    distance: number;
-  }
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [isFriendMode, setIsFriendMode] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +45,10 @@ export default function MapScreen() {
         setLocation(currentLocation);
         fetchCity(currentLocation);
         fetchDangerZones(currentLocation.coords.latitude, currentLocation.coords.longitude);
+        const userId = await AsyncStorage.getItem('uid');
+        if (userId) {
+          fetchFriends(parseInt(userId), currentLocation.coords.latitude, currentLocation.coords.longitude);
+        }
       } catch (error) {
         setErrorMsg('Failed to get current location');
         console.error(error);
@@ -64,10 +80,25 @@ export default function MapScreen() {
     }
   };
 
+  const fetchFriends = async (userId: number, lat: number, lon: number) => {
+    try {
+      const nearbyFriends = await getNearbyFriends(userId, lat, lon);
+      console.log('Fetched friends:', nearbyFriends); // Log fetched friends
+      setFriends(nearbyFriends);
+    } catch (error) {
+      console.error('Failed to fetch nearby friends:', error);
+    }
+  };
+
   const updateLocation = useCallback((newLocation: Location.LocationObject) => {
     setLocation(newLocation);
     fetchCity(newLocation);
     fetchDangerZones(newLocation.coords.latitude, newLocation.coords.longitude);
+    AsyncStorage.getItem('uid').then(userId => {
+      if (userId) {
+        fetchFriends(parseInt(userId), newLocation.coords.latitude, newLocation.coords.longitude);
+      }
+    });
   }, []);
 
   const toggleTracking = useCallback(() => {
@@ -116,6 +147,22 @@ export default function MapScreen() {
     });
   };
 
+  const toggleFriendMode = () => {
+    setIsFriendMode(prevMode => {
+      if (!prevMode) {
+        // Refresh friends data when turning on the mode
+        if (location) {
+          AsyncStorage.getItem('uid').then(userId => {
+            if (userId) {
+              fetchFriends(parseInt(userId), location.coords.latitude, location.coords.longitude);
+            }
+          });
+        }
+      }
+      return !prevMode;
+    });
+  };
+
   return (
     <View style={styles.container}>
       {location && (
@@ -135,7 +182,7 @@ export default function MapScreen() {
             }}
             title="Your Location"
           />
-          {isDangerZoneMode && dangerZones.map((zone: any) => (
+          {isDangerZoneMode && dangerZones.map((zone: DangerZone) => (
             <React.Fragment key={zone.id}>
               <Marker
                 coordinate={{
@@ -143,7 +190,7 @@ export default function MapScreen() {
                   longitude: zone.lon,
                 }}
                 title="Danger Zone"
-                description={zone.description+" => Distance: "+zone.distance.toFixed(2)+" km"}
+                description={`${zone.description} => Distance: ${zone.distance.toFixed(2)} km`}
                 pinColor="red"
               />
               <Circle
@@ -151,11 +198,27 @@ export default function MapScreen() {
                   latitude: zone.lat,
                   longitude: zone.lon,
                 }}
-                radius={100} // Adjust this value as needed
+                radius={100}
                 fillColor="rgba(255, 0, 0, 0.1)"
                 strokeColor="rgba(255, 0, 0, 0.3)"
               />
             </React.Fragment>
+          ))}
+          {isFriendMode && friends.map((friend: Friend) => (
+            <Marker
+              key={friend.id}
+              coordinate={{
+                latitude: friend.lat,
+                longitude: friend.lon,
+              }}
+              title={friend.name}
+              description={`Distance: ${friend.distance.toFixed(2)} km`}
+            >
+              <Image
+                source={require('../../assets/images/default-profile-image.png')}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
+              />
+            </Marker>
           ))}
         </MapView>
       )}
@@ -172,6 +235,14 @@ export default function MapScreen() {
         >
           <Ionicons name={isTracking ? "location" : "location-outline"} size={24} color="white" />
           <Text style={styles.buttonText}>{isTracking ? "Stop Tracking" : "Track Me"}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.button, isFriendMode && styles.friendButton]}
+          onPress={toggleFriendMode}
+        >
+          <Ionicons name={isFriendMode ? "people" : "people-outline"} size={24} color="white" />
+          <Text style={styles.buttonText}>{isFriendMode ? "Hide Friends" : "Show Friends"}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, isDangerZoneMode && styles.dangerZoneButton]}
@@ -221,10 +292,11 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
+    bottom: 10,
+    alignSelf: 'flex-start',
+    left: 10,
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   button: {
     flexDirection: 'row',
@@ -246,6 +318,9 @@ const styles = StyleSheet.create({
   },
   dangerZoneButton: {
     backgroundColor: 'rgba(255, 87, 34, 0.9)', // Semi-transparent orange
+  },
+  friendButton: {
+    backgroundColor: 'rgba(156, 39, 176, 0.9)', // Semi-transparent purple
   },
   buttonText: {
     color: 'white',

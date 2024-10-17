@@ -6,6 +6,7 @@ import ballerina/mime;
 import ballerina/file;
 import ballerina/os;
 import safe_srilanka.dangerZoneController as dangerZoneController;
+import safe_srilanka.friendsController as friendsController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -254,6 +255,14 @@ service /safe_srilanka/images on apiListener {
         }
 
         return response;
+    }
+}
+
+// Add this new service
+service /safe_srilanka/database/friends on apiListener {
+    resource function get nearby(int userId, decimal lat, decimal lon, decimal radius = 5) returns json|error {
+        io:println("Fetching nearby friends");
+        return friendsController:getNearbyFriends(userId, lat, lon, radius);
     }
 }
 
