@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,10 +14,18 @@ const CallActiveModal: React.FC<CallActiveModalProps> = ({
   callDuration,
   onEndCall,
 }) => {
+  const [isMuted, setIsMuted] = useState(false);
+
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+  };
+
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
+    // Since this is a fake mute, there's no actual audio handling.
+    // In a real scenario, you'd handle audio streams here.
   };
 
   return (
@@ -25,10 +33,22 @@ const CallActiveModal: React.FC<CallActiveModalProps> = ({
       <View style={styles.container}>
         <Ionicons name="call" size={64} color="#4CAF50" />
         <Text style={styles.callDuration}>{formatDuration(callDuration)}</Text>
-        <TouchableOpacity style={styles.endCallButton} onPress={onEndCall}>
-          <Ionicons name="call-sharp" size={48} color="white" />
-          <Text style={styles.buttonText}>End Call</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.muteButton} onPress={toggleMute}>
+            <Ionicons
+              name={isMuted ? 'mic-off' : 'mic'}
+              size={36}
+              color={isMuted ? '#D32F2F' : '#4CAF50'}
+            />
+            <Text style={styles.buttonText}>
+              {isMuted ? 'Muted' : 'Mute'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.endCallButton} onPress={onEndCall}>
+            <Ionicons name="call-sharp" size={48} color="white" />
+            <Text style={styles.buttonText}>End Call</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -58,6 +78,16 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     color: '#333',
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  muteButton: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
   endCallButton: {
     flexDirection: 'row',
     backgroundColor: '#D32F2F',
@@ -70,7 +100,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    marginTop: 15,
   },
   buttonText: {
     color: 'white',

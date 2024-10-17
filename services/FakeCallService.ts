@@ -1,6 +1,6 @@
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import * as TaskManager from 'expo-task-manager';
 import { Recording } from './AudioService';
 
@@ -19,9 +19,8 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data, error, executionIn
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: true,
+    shouldPlaySound: false, // We'll handle sound manually
     shouldSetBadge: false,
-    priority: Notifications.AndroidNotificationPriority.MAX,
   }),
 });
 
@@ -37,51 +36,24 @@ export async function playRecording(recording: Recording) {
         { shouldPlay: true }
       );
       sound = newSound;
+      // Set looping to true for continuous playback during the call
+      await sound.setIsLoopingAsync(true);
     } else {
-      // No user recordings; this block can be removed
+      // No user recordings; this block should never be called
       console.warn('User recordings are not supported.');
+    }
+
+    if (Platform.OS === 'android') {
+      await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
+        playsInSilentModeIOS: true,
+      });
     }
   } catch (error) {
     console.error('Error playing recording:', error);
   }
 }
-
-// Function to initiate a fake call
-export const initiateFakeCall = async (recording: Recording) => {
-  console.log('Initiating fake call with recording:', recording);
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('fake-call', {
-      name: 'Fake Call',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
-
-  const notificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Incoming Call',
-      body: 'Tap to answer',
-      data: { recording },
-      sound: 'default_ringtone.mp3', // Ensure this sound file is correctly placed and is MP3
-      priority: Notifications.AndroidNotificationPriority.MAX,
-      vibrate: [0, 250, 250, 250],
-    },
-    trigger: { seconds: 1 }, // Trigger immediately
-  });
-
-  console.log('Scheduled notification with ID:', notificationId);
-
-  if (Platform.OS === 'android') {
-    await Audio.setAudioModeAsync({
-      staysActiveInBackground: true,
-      shouldDuckAndroid: true,
-      playsInSilentModeIOS: true,
-      playsThroughSilentSwitch: true,
-    });
-  }
-};
 
 // Function to stop the fake call (stop playback and dismiss notifications)
 export const stopFakeCall = async () => {
@@ -102,7 +74,13 @@ export const stopFakeCall = async () => {
 Notifications.addNotificationResponseReceivedListener((response) => {
   const recording: Recording = response.notification.request.content.data.recording;
   console.log('Handling notification response, playing recording:', recording);
-  playRecording(recording);
+  playRecording(recording)
+    .then(() => {
+      Alert.alert('Call Accepted', `Playing "${recording.name}"`);
+    })
+    .catch((error) => {
+      console.error('Error handling call acceptance:', error);
+    });
 });
 
 // Register the background task

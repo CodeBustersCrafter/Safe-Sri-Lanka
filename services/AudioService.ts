@@ -1,24 +1,31 @@
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Define the recordings directory (no longer needed since we are removing user recordings)
+// Key for storing selected recording in AsyncStorage
 const SELECTED_RECORDING_KEY = 'selectedRecording';
 
+// Recording interface
+export interface Recording {
+  uri: number; // number since we're using require for default recordings
+  name: string;
+  isDefault: boolean;
+}
+
 // Define default recordings with MP3 files
-export const defaultRecordings = [
+export const defaultRecordings: Recording[] = [
   {
     uri: require('../assets/default_recordings/sinhala.mp3'),
-    name: 'සිංහල සුබ දවසක්!',
+    name: 'සිංහල', // Sinhala Translation
     isDefault: true,
   },
   {
     uri: require('../assets/default_recordings/english.mp3'),
-    name: 'Good Day!',
+    name: 'English',
     isDefault: true,
   },
   {
     uri: require('../assets/default_recordings/tamil.mp3'),
-    name: 'நண்பர்களே, இன்று நல்ல நாள்!',
+    name: 'தமிழ்', // Tamil Translation
     isDefault: true,
   },
 ];
@@ -35,10 +42,3 @@ export const getSelectedRecording = async (): Promise<Recording | null> => {
   console.log('Retrieved selected recording:', selectedRecording);
   return selectedRecording ? JSON.parse(selectedRecording) : null;
 };
-
-// Recording interface
-export interface Recording {
-  uri: string | number; // number for default recordings (require)
-  name: string;
-  isDefault: boolean;
-}

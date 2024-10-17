@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert } from 'react-native';
-import { Audio } from 'expo-av';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { setSelectedRecording, getSelectedRecording, defaultRecordings, Recording } from '../services/AudioService';
+import { Audio } from 'expo-av';
 
 export default function RecordingsManager() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [selectedRecording, setSelectedRecordingState] = useState<Recording | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     loadRecordings();
-  }, []);
-
-  useEffect(() => {
-    // Fetch the currently selected recording
-    const fetchSelectedRecording = async () => {
-      const recording = await getSelectedRecording();
-      setSelectedRecordingState(recording);
-    };
     fetchSelectedRecording();
   }, []);
 
@@ -27,16 +17,21 @@ export default function RecordingsManager() {
     setRecordings(defaultRecordings);
   };
 
+  const fetchSelectedRecording = async () => {
+    const recording = await getSelectedRecording();
+    setSelectedRecordingState(recording);
+  };
+
   const handleSelectRecording = async (recording: Recording) => {
     await setSelectedRecording(recording);
     setSelectedRecordingState(recording);
-    Alert.alert('Recording Selected', `You have selected: ${recording.name}`);
+    Alert.alert('Ringtone Selected', `You have selected: ${recording.name}`);
   };
 
   const handlePlayRecording = async (recording: Recording) => {
     try {
       const { sound } = await Audio.Sound.createAsync(
-        { uri: recording.uri.toString() },
+        recording.uri,
         { shouldPlay: true }
       );
       // Automatically unload the sound after playback finishes
@@ -47,14 +42,20 @@ export default function RecordingsManager() {
       });
     } catch (error) {
       console.error('Error playing recording:', error);
-      Alert.alert('Playback Error', 'Unable to play the selected recording.');
+      Alert.alert('Playback Error', 'Unable to play the selected ringtone.');
     }
   };
 
   const renderItem = ({ item }: { item: Recording }) => (
-    <TouchableOpacity style={styles.item} onPress={() => handleSelectRecording(item)}>
+    <TouchableOpacity
+      style={[
+        styles.item,
+        selectedRecording?.name === item.name && styles.selectedItem,
+      ]}
+      onPress={() => handleSelectRecording(item)}
+    >
       <View style={styles.itemContent}>
-        <Ionicons name="musical-notes-outline" size={24} color="#333" />
+        <Ionicons name="musical-note-outline" size={24} color="#333" />
         <Text style={styles.itemText}>{item.name}</Text>
       </View>
       <TouchableOpacity onPress={() => handlePlayRecording(item)}>
@@ -109,6 +110,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+  },
+  selectedItem: {
+    backgroundColor: '#E0F7FA',
   },
   itemContent: {
     flexDirection: 'row',
