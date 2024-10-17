@@ -35,40 +35,38 @@ export default function FakeCallScreen() {
       if (callTimerRef.current) {
         clearInterval(callTimerRef.current);
       }
-      stopFakeCall(); // Ensure stopping fake call on unmount
+      stopFakeCall();
     };
   }, []);
 
   const loadSelectedRecording = async () => {
     const recording = await getSelectedRecording();
     setSelectedRecordingState(recording);
-    if (!recording) {
-      Alert.alert('No Ringtone Selected', 'Please select a ringtone in Recordings Manager.');
-    }
+    console.log('Loaded selected recording:', recording);
   };
 
   const handleGetFakeCall = async () => {
     if (selectedRecording) {
       const randomName = getRandomCallerName();
       setCallerName(randomName);
-      console.log('Initiating fake call...');
+      console.log('Initiating fake call with recording:', selectedRecording);
       setIsModalVisible(true);
       await initiateFakeCall(selectedRecording);
     } else {
+      console.log('No recording selected');
       Alert.alert('No Ringtone Selected', 'Please select a ringtone in Recordings Manager.');
     }
   };
 
   const initiateFakeCall = async (recording: Recording) => {
     try {
-      // Create a notification to simulate an incoming call
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Incoming Call',
           body: `Call from ${callerName}`,
-          data: { recordingName: recording.name }, // Pass only the name
+          data: { recording },
         },
-        trigger: { seconds: 1 }, // Trigger immediately
+        trigger: { seconds: 1 },
       });
     } catch (error) {
       console.error('Error initiating fake call:', error);
@@ -79,11 +77,11 @@ export default function FakeCallScreen() {
     setIsModalVisible(false);
     setIsCallActive(true);
     startCallTimer();
-    if (selectedRecording && selectedRecording.source) {
+    if (selectedRecording) {
+      console.log('Playing selected recording:', selectedRecording);
       playRecording(selectedRecording);
     } else {
-      console.error('Selected recording or its source is undefined');
-      Alert.alert('Error', 'Unable to play the selected recording.');
+      console.error('No recording selected for playback');
     }
   };
 
