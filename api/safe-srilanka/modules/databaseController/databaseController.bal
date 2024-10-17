@@ -95,6 +95,15 @@ public function addProfile(json payload) returns json|error {
 public function insertTrace(int id, string location) returns json|error {
     sql:ParameterizedQuery query = `INSERT INTO trace (id, timestamp, location) VALUES (${id}, CURRENT_TIMESTAMP(), ${location})`;
     sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    // Extract lat and lon from the location string
+    int? index = location.indexOf("_");
+    if (index is int) {
+        string latStr = location.substring(0,index);
+        string lonStr = location.substring(index + 1);
+        decimal lat = check decimal:fromString(latStr);
+        decimal lon = check decimal:fromString(lonStr);
+        _ = check updateCurrentLocation(id, lat, lon);
+    }
     if (result is sql:ExecutionResult) {
         return { "status": "success", "message": "Trace inserted successfully" };
     } else {
@@ -136,16 +145,27 @@ public function insertRelationship(int user1, int user2) returns json|error {
 }
 
 // Update current location
-public function updateCurrentLocation(int id, decimal lat, decimal lon) returns json|error {
-    sql:ParameterizedQuery query = `UPDATE current_location SET lat = ${lat}, lon = ${lon} WHERE id = ${id}`;
+public function updateCurrentLocation(int userId, decimal lat, decimal lon) returns json|error {
+    // First, check if a record exists for the given userId
+    sql:ParameterizedQuery checkQuery = `SELECT id FROM current_location WHERE id = ${userId}`;
+    stream<record {}, error?> checkStream = dbClient1->query(checkQuery);
+    record {}|error? checkResult = checkStream.next();
+
+    sql:ParameterizedQuery query;
+    if (checkResult is ()) {
+        // If no record exists, insert a new one
+        query = `INSERT INTO current_location (id, lat, lon) VALUES (${userId}, ${lat}, ${lon})`;
+    } else {
+        // If a record exists, update it
+        query = `UPDATE current_location SET lat = ${lat}, lon = ${lon} WHERE id = ${userId}`;
+    }
     sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
     if (result is sql:ExecutionResult) {
-        return { "status": "success", "message": "Current location updated successfully" };
+        return { "status": "success", "message": "Current location upserted successfully" };
     } else {
-        return { "status": "error", "message": "Failed to update current location" };
+        return { "status": "error", "message": "Failed to upsert current location" };
     }
 }
-
 // Update profile
 public function updateProfile(int id, json payload) returns json|error {
     sql:ParameterizedQuery query = `UPDATE profile SET 
