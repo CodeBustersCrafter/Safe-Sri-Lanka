@@ -23,13 +23,20 @@ export default function RecordingsManager() {
   };
 
   const handleSelectRecording = async (recording: Recording) => {
-    await setSelectedRecording(recording);
-    setSelectedRecordingState(recording);
-    Alert.alert('Ringtone Selected', `You have selected: ${recording.name}`);
+    try {
+      await setSelectedRecording(recording);
+      setSelectedRecordingState(recording);
+      Alert.alert('Ringtone Selected', `You have selected: ${recording.name}`);
+      console.log('Selected recording:', recording);
+    } catch (error) {
+      console.error('Error selecting recording:', error);
+      Alert.alert('Error', 'Failed to select the recording. Please try again.');
+    }
   };
 
   const handlePlayRecording = async (recording: Recording) => {
     try {
+      console.log('Playing recording:', recording);
       const { sound } = await Audio.Sound.createAsync(
         recording.source,
         { shouldPlay: true }

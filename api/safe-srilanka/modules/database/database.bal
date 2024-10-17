@@ -4,7 +4,7 @@ import ballerina/sql;
 import ballerina/io;
 // MySQL Database configuration
 configurable string dbUser = "root";
-configurable string dbPassword = "root";
+configurable string dbPassword = "2002";
 configurable string dbHost = "localhost";
 configurable int dbPort = 3306;
 configurable string dbName = "safe_sri_lanka";
