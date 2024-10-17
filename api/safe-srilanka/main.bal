@@ -5,6 +5,7 @@ import ballerina/io;
 import ballerina/mime;
 import ballerina/file;
 import ballerina/os;
+import safe_srilanka.dangerZoneController as dangerZoneController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -164,6 +165,10 @@ service /safe_srilanka/database/dangerZone on apiListener {
             io:println("Error: Invalid payload for inserting danger zone");
             return { "error": "Invalid payload" };
         }
+    }
+    resource function get nearby(decimal lat, decimal lon, decimal radius = 1000) returns json|error {
+        io:println("Fetching nearby danger zones");
+        return dangerZoneController:getNearbyDangerZones(lat, lon, radius);
     }
 }
 
