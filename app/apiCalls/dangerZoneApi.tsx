@@ -3,6 +3,7 @@ import { BACKEND_URL } from '../const';
 export const getNearbyDangerZones = async (lat: number, lon: number, radius: number = 2) => {
   try {
     const response = await fetch(`${BACKEND_URL}/database/dangerZone/nearby?lat=${lat}&lon=${lon}&radius=${radius}`);
+    console.log(response.status);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
