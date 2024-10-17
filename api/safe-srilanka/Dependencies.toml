@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.1"
+distribution-version = "2201.10.0"
 
 [[package]]
 org = "ballerina"
@@ -371,8 +371,10 @@ modules = [
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBot"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.controllers"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.dangerZoneController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.database"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.databaseController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.friendsController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.models"}
 ]
 

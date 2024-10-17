@@ -212,6 +212,8 @@ def Agent_selector(Nvidia_client, prompt):
         4. If it's about self-defence services like martial arts, self-defence training, respond with 'self-defence'.
         5. If it's related to women safety but doesn't fit the above categories, respond with 'general'.
         
+        you should respond with only one word.(emergency, legal, mental, self-defence, general)
+        only give it in the text response.
         Prompt: {prompt}
         """
             
@@ -222,7 +224,7 @@ def Agent_selector(Nvidia_client, prompt):
         prompt=SLM_prompt,
         temperature=0.7,
         top_p=0.95,
-        max_tokens=200,
+        max_tokens=100,
         stream=False
         )
 

@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 
+// Custom agent icons using Emojis
+const agentIcons = {
+  'emergency services': '🚨',
+  'legal services': '⚖️',
+  'mental health services': '🧠',
+  'self-defense services': '🥋',
+  'general services': '🔧',
+};
+
 export default function AI_AssistantScreen() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string; agent?: string }>>([]);
@@ -37,8 +46,12 @@ export default function AI_AssistantScreen() {
       <ScrollView style={styles.chatContainer}>
         {chatHistory.map((chat, index) => (
           <View key={index} style={chat.role === 'user' ? styles.userMessage : styles.assistantMessage}>
+            {chat.agent && (
+              <Text style={styles.agentText}>
+                {agentIcons[chat.agent.toLowerCase() as keyof typeof agentIcons] || '💬'} {chat.agent}
+              </Text>
+            )}
             <Text style={styles.messageText}>{chat.content}</Text>
-            {chat.agent && <Text style={styles.agentText}>Agent: {chat.agent}</Text>}
           </View>
         ))}
       </ScrollView>
@@ -81,7 +94,7 @@ const styles = StyleSheet.create({
   },
   assistantMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E5E5EA',
+    backgroundColor: '#007AFF', // Make assistant message same blue as user message
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
@@ -93,9 +106,11 @@ const styles = StyleSheet.create({
   },
   agentText: {
     color: '#ffffff',
-    fontSize: 12,
-    marginTop: 5,
-    fontStyle: 'italic',
+    fontSize: 14,
+    marginBottom: 5,
+    fontWeight: 'bold',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
