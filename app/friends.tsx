@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BACKEND_URL } from './const';
 
 interface UserProfile {
   id: number;
@@ -30,7 +31,7 @@ export default function FriendsScreen() {
 
   const fetchProfiles = async () => {
     try {
-      const response = await fetch('http://172.18.128.1:8080/safe_srilanka/database/profile/getProfiles');
+      const response = await fetch(`${BACKEND_URL}/database/profile/getProfiles`);
       const data = await response.json();
       if (Array.isArray(data)) {
         // Filter out the current user's profile
@@ -62,7 +63,7 @@ export default function FriendsScreen() {
         text: 'Connect',
         onPress: async () => {
           try {
-            const response = await fetch('http://172.18.128.1:8080/safe_srilanka/database/relationship/insert', {
+            const response = await fetch(`${BACKEND_URL}/database/relationship/insert`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ export default function FriendsScreen() {
   const renderUserCard = (user: UserProfile) => (
     <View key={user.id} style={styles.card}>
       <Image
-        source={{ uri: `http://172.18.128.1:8080/safe_srilanka/images/${user.profileImage}` }}
+        source={{ uri: `${BACKEND_URL}/images/${user.profileImage}` }}
         style={styles.profileImage}
       />
       <View style={styles.userInfo}>

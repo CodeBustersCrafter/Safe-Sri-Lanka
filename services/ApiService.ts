@@ -1,9 +1,8 @@
 import { Alert } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { BACKEND_URL } from '../app/const';
 // This is a placeholder function. Replace the URL with your actual backend URL when it's ready.
-const BACKEND_URL = 'http://172.18.128.1:8080/safe_srilanka';
 
 export const sendLocationToServer = async (location: Location.LocationObject): Promise<void> => {
   console.log("Location: ", location.coords.latitude, location.coords.longitude, location.timestamp);
@@ -63,7 +62,7 @@ export const updateProfile = async (profileData: {
   profileImage: string | null;
 }): Promise<void> => {
   try {
-    const response = await fetch(`${BACKEND_URL}/profile/update`, {
+    const response = await fetch(`${BACKEND_URL}/database/profile/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { LocationObjectCoords } from 'expo-location';
-
+import { BACKEND_URL } from './const';
 const AddDangerZone = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState<LocationObjectCoords | null>(null);
@@ -35,7 +35,7 @@ const AddDangerZone = () => {
     }
 
     try {
-      const response = await fetch('http://172.18.128.1:8080/safe_srilanka/database/dangerZone/insert', {
+      const response = await fetch(`${BACKEND_URL}/database/dangerZone/insert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

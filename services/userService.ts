@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BACKEND_URL } from '../app/const';
 
-const API_URL = 'http://172.18.128.1:8080/safe_srilanka/database/profile';
+const API_URL = `${BACKEND_URL}/database/profile`;
 
 interface UserProfile {
   name: string;

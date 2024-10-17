@@ -4,12 +4,17 @@ import safe_srilanka.databaseController as databaseController;
 import ballerina/io;
 import ballerina/mime;
 import ballerina/file;
+import ballerina/os;
+
 // Define the port for the HTTP listener
 const int PORT = 8080;
 
+// Use environment variable for backend IP
+string backendIp = os:getEnv("BACKEND_IP");
+
 // Create an HTTP listener
 listener http:Listener apiListener = new(PORT, config = {
-    host: "172.18.128.1"
+    host: backendIp
 });
 
 // Start the services

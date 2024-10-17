@@ -8,6 +8,7 @@ import EditableField from '../components/EditableField';
 import FriendsCard from '../components/FriendsCard';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchUserProfile, saveUserProfile, updateUserProfile } from '../services/userService'
+import { BACKEND_URL } from './const';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -87,7 +88,7 @@ export default function ProfileScreen() {
   const fetchFriends = async () => {
     console.log('Fetching friends for UID:', uid);
     try {
-      const response = await fetch(`http://172.18.128.1:8080/safe_srilanka/database/relationship/getRelationship?id=${uid}`);
+      const response = await fetch(`${BACKEND_URL}/database/relationship/getRelationship?id=${uid}`);
       const data = await response.json();
       console.log('Received friend data:', data);
       if (data && data.relationships && data.relationships.length > 0) {
@@ -157,7 +158,7 @@ export default function ProfileScreen() {
     return (
       <View key={friendId} style={styles.card}>
         <Image
-          source={{ uri: `http://172.18.128.1:8080/safe_srilanka/images/${friendId}` }}
+          source={{ uri: `${BACKEND_URL}/images/${friendId}` }}
           style={styles.profileImage}
         />
         <View style={styles.userInfo}>
@@ -186,7 +187,7 @@ export default function ProfileScreen() {
           text: 'Yes',
           onPress: async () => {
             try {
-              const response = await fetch(`http://172.18.128.1:8080/safe_srilanka/database/relationship/deleteRelationship`, {
+              const response = await fetch(`${BACKEND_URL}/database/relationship/deleteRelationship`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
