@@ -122,18 +122,21 @@ export default function FakeCallScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
+      {/* Header Section (Removed Select Recording Button) */}
       <View style={styles.header}>
         <Text style={styles.title}>Fake Call Simulator</Text>
-        <TouchableOpacity onPress={navigateToRecordingsManager} style={styles.settingsButton}>
-          <Ionicons name="musical-notes-outline" size={28} color="#333" />
-        </TouchableOpacity>
       </View>
 
       {/* Start Fake Call Button */}
       <TouchableOpacity style={styles.callButton} onPress={handleGetFakeCall}>
         <Ionicons name="call-outline" size={48} color="white" />
         <Text style={styles.buttonText}>Start Fake Call</Text>
+      </TouchableOpacity>
+
+      {/* Select Recording Button at the Bottom */}
+      <TouchableOpacity style={styles.selectRecordingButton} onPress={navigateToRecordingsManager}>
+        <Ionicons name="musical-notes-outline" size={24} color="#333" />
+        <Text style={styles.selectRecordingText}>Select Recording</Text>
       </TouchableOpacity>
 
       {/* Modals */}
@@ -159,10 +162,10 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     backgroundColor: '#F0F4F7',
+    justifyContent: 'space-between', // Ensure space between elements
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    // Removed settingsButton style
     alignItems: 'center',
   },
   title: {
@@ -172,9 +175,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.1)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-  },
-  settingsButton: {
-    padding: 8,
   },
   callButton: {
     backgroundColor: '#FF3B30',
@@ -196,5 +196,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 10,
     fontWeight: '600',
+  },
+  selectRecordingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 40, // Adjust as needed
+  },
+  selectRecordingText: {
+    color: '#333',
+    fontSize: 16,
+    marginLeft: 8,
   },
 });
