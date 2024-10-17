@@ -7,10 +7,17 @@ import { Audio } from 'expo-av';
 export default function RecordingsManager() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [selectedRecording, setSelectedRecordingState] = useState<Recording | null>(null);
+  const [playingRecordingId, setPlayingRecordingId] = useState<string | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     loadRecordings();
     fetchSelectedRecording();
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, []);
 
   const loadRecordings = () => {
@@ -34,22 +41,44 @@ export default function RecordingsManager() {
     }
   };
 
-  const handlePlayRecording = async (recording: Recording) => {
+  const handlePlayStopRecording = async (recording: Recording) => {
     try {
-      console.log('Playing recording:', recording);
-      const { sound } = await Audio.Sound.createAsync(
-        recording.source,
-        { shouldPlay: true }
-      );
-      // Automatically unload the sound after playback finishes
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if ('didJustFinish' in status && status.didJustFinish) {
-          sound.unloadAsync();
+      if (playingRecordingId === recording.name) {
+        // Stop playback
+        if (sound) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
         }
-      });
+        setSound(null);
+        setPlayingRecordingId(null);
+        console.log('Stopped playing:', recording.name);
+      } else {
+        // Stop any currently playing sound
+        if (sound) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+
+        // Start new playback
+        console.log('Playing recording:', recording.name);
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          recording.source,
+          { shouldPlay: true }
+        );
+        setSound(newSound);
+        setPlayingRecordingId(recording.name);
+
+        // Handle playback finish
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlayingRecordingId(null);
+            setSound(null);
+          }
+        });
+      }
     } catch (error) {
-      console.error('Error playing recording:', error);
-      Alert.alert('Playback Error', 'Unable to play the selected ringtone.');
+      console.error('Error handling recording playback:', error);
+      Alert.alert('Playback Error', 'Unable to play or stop the selected ringtone.');
     }
   };
 
@@ -65,8 +94,12 @@ export default function RecordingsManager() {
         <Ionicons name="musical-note-outline" size={24} color="#333" />
         <Text style={styles.itemText}>{item.name}</Text>
       </View>
-      <TouchableOpacity onPress={() => handlePlayRecording(item)}>
-        <Ionicons name="play-circle-outline" size={30} color="#4CAF50" />
+      <TouchableOpacity onPress={() => handlePlayStopRecording(item)}>
+        <Ionicons 
+          name={playingRecordingId === item.name ? "stop-circle-outline" : "play-circle-outline"} 
+          size={30} 
+          color={playingRecordingId === item.name ? "#FF0000" : "#4CAF50"} 
+        />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -77,7 +110,7 @@ export default function RecordingsManager() {
       <FlatList
         data={recordings}
         renderItem={renderItem}
-        keyExtractor={(item, index) => `recording-${index}`}
+        keyExtractor={(item) => item.name}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.emptyText}>No recordings available.</Text>}
       />
