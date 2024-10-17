@@ -11,7 +11,6 @@ public function chatWithAI(string message) returns json|error {
     };
 
     http:Response response = check pythonClient->post("/chat", payload);
-    io:println(response);
     if (response.statusCode == 200) {
         json responsePayload = check response.getJsonPayload();
         return responsePayload;
