@@ -1,6 +1,9 @@
 import ballerina/log;
 import safe_srilanka.models as models;
 import safe_srilanka.aiChatBot as aiChatBot;
+import ballerina/random;
+import ballerina/lang.array;
+import ballerina/io;
 // Define a structure for Emergency Numbers
 type EmergencyNumber record {
     string id;
@@ -71,27 +74,33 @@ public function aiChat(json payload) returns json|error {
 // In-memory storage for user profiles (Replace with MongoDB integration)
 map<models:UserProfile> userProfiles = {};
 
-// Function to update User Profile
-public function updateProfile(json payload) returns json|error {
-    int id = check payload.id.ensureType();
-    string name = check payload.name.ensureType();
-    string mobile = check payload.mobile.ensureType();
-    string whatsapp = check payload.whatsapp.ensureType();
-    string email = check payload.email.ensureType();
-    string location = check payload.location.ensureType();
-    string profileImage = check payload.profileImage.ensureType();
+public function uploadImage(json payload) returns json|error {
+    io:println(payload);
+    io:println("upload image is called from the database");
+    // Generate a random number for the image filename
+    int randomNumber = check random:createIntInRange(1000, 9999);
+    string filename = randomNumber.toString() + ".jpg";
 
-    models:UserProfile profile = {
-        id,
-        name,
-        mobile,
-        whatsapp,
-        email,
-        location,
-        profileImage: profileImage
+    // Extract the base64 image data from the payload
+    string imageData = payload.toString();
+
+    // Decode the base64 image data
+    byte[]|error decodedImage = check array:fromBase64(imageData);
+    if (decodedImage is error) {
+        return { "status": "error", "message": "Failed to decode image data: " + decodedImage.message() };
+    }
+
+    // Save the image to a local file
+    string filePath = "./images/" + filename;
+    error? writeResult = io:fileWriteBytes(filePath, decodedImage);
+    if (writeResult is error) {
+        return { "status": "error", "message": "Failed to write image file: " + writeResult.message() };
+    }
+
+    // Return the filename
+    return {
+        "status": "success",
+        "message": "Image uploaded successfully",
+        "filename": filename
     };
-
-    userProfiles[id.toString()] = profile;
-    log:printInfo("Profile updated for user: " + name);
-    return { "status": "success", "profile": profile}.toJson();
 }

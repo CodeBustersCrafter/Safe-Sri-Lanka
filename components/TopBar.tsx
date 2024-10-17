@@ -14,6 +14,9 @@ const TopBar = () => {
       <View style={styles.container}>
         <Text style={styles.title}>Safe Sri Lanka</Text>
         <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={() => router.push('/addDangerZones')} style={styles.button}>
+            <Ionicons name="warning-outline" size={24} color="white" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/notifications')} style={styles.button}>
             <Ionicons name="notifications-outline" size={24} color="white" />
           </TouchableOpacity>

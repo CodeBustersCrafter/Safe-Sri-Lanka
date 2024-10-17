@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // This is a placeholder function. Replace the URL with your actual backend URL when it's ready.
-const BACKEND_URL = 'http://16.170.245.231:8080/safe_srilanka';
+const BACKEND_URL = 'http://172.18.128.1:8080/safe_srilanka';
 
 export const sendLocationToServer = async (location: Location.LocationObject): Promise<void> => {
   console.log("Location: ", location.coords.latitude, location.coords.longitude, location.timestamp);

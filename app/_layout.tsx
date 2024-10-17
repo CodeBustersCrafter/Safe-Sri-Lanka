@@ -52,6 +52,18 @@ export default function RootLayout() {
             title: 'Profile',
           }}
         />
+        <Stack.Screen
+          name="friends"
+          options={{
+            title: 'Friends',
+          }}
+        />
+        <Stack.Screen
+          name="dangerZones"
+          options={{
+            title: 'Danger Zones',
+          }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

@@ -26,16 +26,52 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({ imageUri, setImageUri }
       quality: 0.5,
     });
 
-    if (!result.cancelled) {
-      setImageUri(result.uri);
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      // Send image to server and save it
+      try {
+        const formData = new FormData();
+        formData.append('image', {
+          uri: result.assets[0].uri,
+          type: 'image/jpeg',
+          name: 'profile_picture.jpg',
+        } as any);
+
+        const response = await fetch('http://172.18.128.1:8080/safe_srilanka/database/profile/uploadImage', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image');
+        }
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          // Save the returned image filename
+          const imageUrl = data.filename;
+          setImageUri(imageUrl);
+        } else {
+          throw new Error(data.message || 'Failed to save image on server');
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        Alert.alert('Error', 'Failed to upload image. Please try again.');
+      }
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={pickImage}>
+      <TouchableOpacity onPress={pickImage}> 
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} />
+          <Image 
+            source={{ uri: `http://172.18.128.1:8080/safe_srilanka/images/${imageUri}` }} 
+            style={styles.image} 
+          />
         ) : (
           <View style={styles.placeholder}>
             <Ionicons name="camera" size={40} color="#aaa" />

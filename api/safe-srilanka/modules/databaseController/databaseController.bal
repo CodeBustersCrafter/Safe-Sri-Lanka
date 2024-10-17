@@ -1,82 +1,206 @@
-import safe_srilanka.models as models;    
-import safe_srilanka.database as database;
+import ballerinax/mysql.driver as _;
+import ballerinax/mysql;
+import ballerina/sql;
 import ballerina/io;
 
-public  function addProfile(json payload) returns json|error {
-    map<models:UserProfile> userProfiles = {};
+// MySQL Database configuration
+configurable string dbUser = "root";
+configurable string dbPassword = "root";
+configurable string dbHost = "localhost";
+configurable int dbPort = 3306;
+configurable string dbName = "safe_sri_lanka";
 
-    int id = check payload.id.ensureType();
-    string name = check payload.name.ensureType();
-    string mobile = check payload.mobile.ensureType();
-    string whatsapp = check payload.whatsapp.ensureType();
-    string email = check payload.email.ensureType();
-    string location = check payload.location.ensureType();
-    string profileImage = check payload.profileImage.ensureType();
-
-    if (userProfiles.hasKey(id.toString())) {
-        return error("Profile with this ID already exists");
-    }
-
-    models:UserProfile newProfile = {
-        id,
-        name,
-        mobile,
-        whatsapp,
-        email,
-        location,
-        profileImage
-    };
-
-    userProfiles[id.toString()] = newProfile;
-    //json result = check database:insertProfile(newProfile.toJson());
-    return { "status": "success", "profile": newProfile.toJson() };
-}
+mysql:Client dbClient1 = check new (host = dbHost, user = dbUser, password = dbPassword, database = dbName, port = dbPort, options = {
+});
 
 public function getUserProfile(string userId) returns json|error {
-    io:println(userId,"is recieved to the database controller");
-    return database:getUserProfile(userId);
+    io:println(userId);
+    io:println("get user profile is called from the database");
+    sql:ParameterizedQuery query = `SELECT * FROM profile WHERE id = ${userId}`;
+    stream<record {}, error?> resultStream = dbClient1->query(query);
+    record {}|error? result = check resultStream.next();
+    io:println(result);
+    if (result is record {}) {
+        return result.toJson();
+    } else {
+        return {};
+    }
 }
 public function getUserProfiles() returns json|error {
-    io:println("All are recieved to the database controller");
-    return database:getUserProfiles();
+    io:println("get user profiles is called from the database");
+    sql:ParameterizedQuery query = `SELECT * FROM profile`;
+    stream<record {}, error?> resultStream = dbClient1->query(query);
+    json[] profiles = [];
+    error? e = resultStream.forEach(function(record {} profile) {
+        profiles.push(profile.toJson());
+    });
+    if (e is error) {
+        return e;
+    }
+    return profiles.toJson();
 }
+// public function addProfile(json payload) returns json|error {
+//     io:println(payload);
+//     io:println("add profile is called from the database");
+//     //sql:ParameterizedQuery query = `INSERT INTO profile (id, name, mobile, whatsapp, email, location, profileImage) VALUES (${(check payload.id).toString()}, ${(check payload.name).toString()}, ${(check payload.mobile).toString()}, 
+//     //${(check payload.whatsapp).toString()}, ${(check payload.email).toString()}, ${(check payload.location).toString()}, 
+//     //${(check payload.profileImage).toString()})`;
 
+//     sql:ParameterizedQuery query = `
+//     CALL AddProfile(${(check payload.name).toString()}, ${(check payload.mobile).toString()}, 
+//     ${(check payload.whatsapp).toString()}, ${(check payload.email).toString()}, ${(check payload.location).toString()}, 
+//     ${(check payload.profileImage).toString()}, @id);
+//     SELECT @id AS id;`;
+//     sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+//     if (result is sql:ExecutionResult) {
+//         return { "status": "success" };
+//     } else {
+//         return { "status": "error" };
+//     }
+// }
+
+public function addProfile(json payload) returns json|error {
+    io:println(payload);
+    io:println("add profile is called from the database");
+    
+    sql:ParameterizedQuery callQuery = `
+    CALL InsertProfile(${(check payload.name).toString()}, ${(check payload.mobile).toString()}, 
+    ${(check payload.whatsapp).toString()}, ${(check payload.email).toString()}, ${(check payload.location).toString()}, 
+    ${(check payload.profileImage).toString()}, @id);`;
+    
+    sql:ExecutionResult|sql:Error callResult = dbClient1->execute(callQuery);
+    
+    if (callResult is sql:Error) {
+        return { "status": "error", "message": callResult.message() };
+    }
+    
+    sql:ParameterizedQuery selectQuery = `SELECT @id AS new_id;`;
+    stream<record {}, sql:Error?> resultStream = dbClient1->query(selectQuery);
+    record {|record {} value;|}|sql:Error? result = resultStream.next();
+    
+    if (result is record {|record {} value;|}) {
+        int|error id = int:fromString(result.value["new_id"].toString());
+        if (id is int) {
+            return { "status": "success", "id": id };
+        } else {
+            return { "status": "error", "message": "Failed to parse ID" };
+        }
+    } else if (result is sql:Error) {
+        return { "status": "error", "message": result.message() };
+    } else {
+        return { "status": "error", "message": "No result returned" };
+    }
+}
 // Insert trace
 public function insertTrace(int id, string location) returns json|error {
-    return database:insertTrace(id, location);
+    sql:ParameterizedQuery query = `INSERT INTO trace (id, timestamp, location) VALUES (${id}, CURRENT_TIMESTAMP(), ${location})`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Trace inserted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to insert trace" };
+    }
 }
 
 // Insert danger zone
-public function insertDangerZone(int id, decimal lat, decimal lon, string description) returns json|error {
-    return database:insertDangerZone(id, lat, lon, description);
+public function insertDangerZone(decimal lat, decimal lon, string description) returns json|error {
+    sql:ParameterizedQuery query = `INSERT INTO danger_zone (lat, lon, description) VALUES (${lat}, ${lon}, ${description})`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Danger zone inserted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to insert danger zone" };
+    }
 }
 
 // Insert current location
 public function insertCurrentLocation(int id, decimal lat, decimal lon) returns json|error {
-    return database:insertCurrentLocation(id, lat, lon);
+    sql:ParameterizedQuery query = `INSERT INTO current_location (id, lat, lon) VALUES (${id}, ${lat}, ${lon})`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Current location inserted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to insert current location" };
+    }
 }
 
 // Insert relationship
 public function insertRelationship(int user1, int user2) returns json|error {
-    return database:insertRelationship(user1, user2);
+    sql:ParameterizedQuery query = `INSERT INTO relationship (user1, user2) VALUES (${user1}, ${user2})`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Relationship inserted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to insert relationship" };
+    }
 }
 
 // Update current location
 public function updateCurrentLocation(int id, decimal lat, decimal lon) returns json|error {
-    return database:updateCurrentLocation(id, lat, lon);
+    sql:ParameterizedQuery query = `UPDATE current_location SET lat = ${lat}, lon = ${lon} WHERE id = ${id}`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Current location updated successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to update current location" };
+    }
 }
 
 // Update profile
 public function updateProfile(int id, json payload) returns json|error {
-    return database:updateProfile(id, payload);
+    sql:ParameterizedQuery query = `UPDATE profile SET 
+        name = ${(check payload.name).toString()}, 
+        mobile = ${(check payload.mobile).toString()}, 
+        whatsapp = ${(check payload.whatsapp).toString()}, 
+        email = ${(check payload.email).toString()}, 
+        location = ${(check payload.location).toString()}, 
+        profileImage = ${(check payload.profileImage).toString()} 
+        WHERE id = ${id}`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Profile updated successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to update profile" };
+    }
 }
 
-// Update relationship
-public function updateRelationship(int user1, int user2, int newUser2) returns json|error {
-    return database:updateRelationship(user1, user2, newUser2);
+
+public function getRelationship(int id) returns json|error {
+    sql:ParameterizedQuery query = `SELECT * FROM relationship INNER JOIN profile ON relationship.user2 = profile.id WHERE user1 = ${id}`;
+    stream<record {}, error?> resultStream = dbClient1->query(query);
+    json[] relationships = [];
+    check from record {} relationship in resultStream
+        do {
+            relationships.push(relationship.toJson());
+        };
+    io:println(relationships);
+    if relationships.length() > 0 {
+        return { "status": "success", "relationships": relationships };
+    } else {
+        return { "status": "success", "relationships": [] };
+    }
+}
+
+// Delete relationship
+public function deleteRelationship(int user1, int user2) returns json|error {
+    sql:ParameterizedQuery query = `DELETE FROM relationship WHERE user1 = ${user1} AND user2 = ${user2}`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Relationship deleted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to delete relationship" };
+    }
 }
 
 // Delete profile
 public function deleteProfile(int id) returns json|error {
-    return database:deleteProfile(id);
+    sql:ParameterizedQuery query = `DELETE FROM profile WHERE id = ${id}`;
+    sql:ExecutionResult|sql:Error result = dbClient1->execute(query);
+    if (result is sql:ExecutionResult) {
+        return { "status": "success", "message": "Profile deleted successfully" };
+    } else {
+        return { "status": "error", "message": "Failed to delete profile" };
+    }
 }
+
+

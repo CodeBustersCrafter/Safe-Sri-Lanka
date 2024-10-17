@@ -4,7 +4,8 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
 import { Ionicons } from '@expo/vector-icons';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export default function MapScreen() {
@@ -67,6 +68,19 @@ export default function MapScreen() {
       return !prevIsTracking;
     });
   }, [updateLocation]);
+
+  const handleToggleTracking = () => {
+    AsyncStorage.getItem('uid').then(uid => {
+      if (uid) {
+        toggleTracking();
+      } else {
+        Alert.alert('Profile Required', 'Please set up your profile before using tracking functionality.');
+      }
+    }).catch(error => {
+      console.error('Error checking UID:', error);
+      Alert.alert('Error', 'Unable to start tracking. Please try again.');
+    });
+  };
 
   return (
     <View style={styles.container}>
