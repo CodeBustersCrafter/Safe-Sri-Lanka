@@ -1,18 +1,34 @@
 import { Alert } from 'react-native';
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // This is a placeholder function. Replace the URL with your actual backend URL when it's ready.
-const BACKEND_URL = 'http://localhost:8080/api';
+const BACKEND_URL = 'http://16.170.245.231:8080/safe_srilanka';
 
-export const sendLocationToServer = async (location: LocationObject): Promise<void> => {
+export const sendLocationToServer = async (location: Location.LocationObject): Promise<void> => {
+  console.log("Location: ", location.coords.latitude, location.coords.longitude, location.timestamp);
   try {
-    const response = await fetch(`${BACKEND_URL}/update-location`, {
+    // Get uid from local storage, if empty set it to 1
+    let uid: number;
+    try {
+      uid = parseInt(await AsyncStorage.getItem('uid') || '1', 10);
+      if (isNaN(uid)) {
+        uid = 1;
+        await AsyncStorage.setItem('uid', uid.toString());
+      }
+    } catch (error) {
+      console.error('Error accessing AsyncStorage:', error);
+      uid = 1;  // Default to 1 if there's an error
+    }
+
+    const response = await fetch(`${BACKEND_URL}/database/trace/insert`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        id: uid,
+        location: `${location.coords.latitude}_${location.coords.longitude}`,
         timestamp: location.timestamp,
       }),
     });
@@ -24,7 +40,16 @@ export const sendLocationToServer = async (location: LocationObject): Promise<vo
     console.log('Location sent successfully');
   } catch (error) {
     console.error('Error sending location to server:', error);
-    // You might want to implement retry logic or error handling here
+    if (error instanceof TypeError && error.message === 'Network request failed') {
+      // Handle network errors
+      console.log('Network error occurred. Please check your internet connection.');
+      // You might want to implement retry logic here
+    } else {
+      // Handle other types of errors
+      console.log('An unexpected error occurred:', error);
+    }
+    // Rethrow the error to be handled by the caller if needed
+    throw error;
   }
 };
 
