@@ -1,12 +1,15 @@
 import { BACKEND_URL } from '../const';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export const getNearbyFriends = async (userId: number, lat: number, lon: number, radius: number = 50) => {
   try {
     const url = new URL(`${BACKEND_URL}/database/relationship/nearby`);
     url.searchParams.append('userId', userId.toString());
     url.searchParams.append('lat', lat.toString());
     url.searchParams.append('lon', lon.toString());
-    url.searchParams.append('radius', radius.toString());
+    
+    const storedFriendRange = await AsyncStorage.getItem('friendRange');
+    const effectiveRadius = storedFriendRange ? parseFloat(storedFriendRange) : radius;
+    url.searchParams.append('radius', effectiveRadius.toString());
 
     const response = await fetch(url.toString());
     console.log(response.status);

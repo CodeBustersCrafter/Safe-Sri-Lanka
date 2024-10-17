@@ -23,6 +23,9 @@ const TopBar = () => {
           <TouchableOpacity onPress={() => router.push('/profile')} style={styles.button}>
             <Ionicons name="person-outline" size={24} color="white" />
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/settings')} style={styles.button}>
+            <Ionicons name="settings-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
