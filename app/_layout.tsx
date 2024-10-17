@@ -64,6 +64,12 @@ export default function RootLayout() {
             title: 'Danger Zones',
           }}
         />
+        <Stack.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+          }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

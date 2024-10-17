@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { LocationObjectCoords } from 'expo-location';
 import { BACKEND_URL } from './const';
+import MapView, { Marker } from 'react-native-maps';
+import Modal from 'react-native-modal';
+
 const AddDangerZone = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState<LocationObjectCoords | null>(null);
+  const [isMapVisible, setIsMapVisible] = useState(false);
+  const [tempLocation, setTempLocation] = useState<LocationObjectCoords | null>(null);
   const router = useRouter();
+  const mapRef = useRef<MapView>(null);
 
   const getCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -59,15 +65,40 @@ const AddDangerZone = () => {
     }
   };
 
+  const openMap = () => {
+    setIsMapVisible(true);
+  };
+
+  const closeMap = () => {
+    setIsMapVisible(false);
+    setTempLocation(null);
+  };
+
+  const handleMapLongPress = (event: any) => {
+    setTempLocation(event.nativeEvent.coordinate);
+  };
+
+  const handleConfirmLocation = () => {
+    if (tempLocation) {
+      setLocation(tempLocation);
+      closeMap();
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Danger Zone</Text>
-      <TouchableOpacity style={styles.button} onPress={getCurrentLocation}>
-        <Text style={styles.buttonText}>Get Current Location</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.button} onPress={getCurrentLocation}>
+          <Text style={styles.buttonText}>Get Current Location</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={openMap}>
+          <Text style={styles.buttonText}>Select Location on Map</Text>
+        </TouchableOpacity>
+      </View>
       {location && (
         <View style={styles.locationCard}>
-          <Text style={styles.locationCardTitle}>Current Location</Text>
+          <Text style={styles.locationCardTitle}>Selected Location</Text>
           <Text style={styles.locationCardText}>
             Latitude: {location.latitude.toFixed(6)}
           </Text>
@@ -82,16 +113,52 @@ const AddDangerZone = () => {
         value={description}
         onChangeText={setDescription}
         maxLength={250}
-        multiline
       />
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
+      <Modal isVisible={isMapVisible} onBackdropPress={closeMap}>
+        <View style={styles.mapContainer}>
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: location?.latitude || 7.8731,
+              longitude: location?.longitude || 80.7718,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            onLongPress={handleMapLongPress}
+          >
+            {tempLocation && (
+              <Marker
+                coordinate={{
+                  latitude: tempLocation.latitude,
+                  longitude: tempLocation.longitude,
+                }}
+              />
+            )}
+          </MapView>
+          <View style={styles.mapButtonContainer}>
+            <TouchableOpacity style={styles.mapButton} onPress={closeMap}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.mapButton} onPress={handleConfirmLocation}>
+              <Text style={styles.buttonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
   locationCard: {
     backgroundColor: 'white',
     borderRadius: 5,
@@ -141,6 +208,28 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 20,
     fontSize: 16,
+  },
+  mapContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  map: {
+    flex: 1,
+  },
+  mapButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
+  mapButton: {
+    backgroundColor: '#ff6347',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 

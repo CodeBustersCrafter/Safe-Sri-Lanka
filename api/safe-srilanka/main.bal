@@ -5,6 +5,8 @@ import ballerina/io;
 import ballerina/mime;
 import ballerina/file;
 import ballerina/os;
+import safe_srilanka.dangerZoneController as dangerZoneController;
+import safe_srilanka.friendsController as friendsController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -43,6 +45,8 @@ service /safe_srilanka/fakecall on apiListener {
         return controllers:stopFakeCall();
     }
 }
+
+
 
 // Mount the Recordings service
 service /safe_srilanka/recordings on apiListener {
@@ -165,6 +169,11 @@ service /safe_srilanka/database/dangerZone on apiListener {
             return { "error": "Invalid payload" };
         }
     }
+
+    resource function get nearby(decimal lat, decimal lon, decimal radius = 1000) returns json|error {
+        io:println("Fetching nearby danger zones");
+        return dangerZoneController:getNearbyDangerZones(lat, lon, radius);
+    }
 }
 
 // Insert current location
@@ -227,6 +236,11 @@ service /safe_srilanka/database/relationship on apiListener {
         }
     }
 
+    // Add this new service
+    resource function get nearby(int userId, decimal lat, decimal lon, decimal radius = 5) returns json|error {
+        io:println("Fetching nearby friends");
+        return friendsController:getNearbyFriends(userId, lat, lon, radius);
+    }
     resource function get getRelationship(http:Request req, int id) returns json|error {
         io:println("Fetching relationship for ID: " + id.toString());
         return databaseController:getRelationship(id);

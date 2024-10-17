@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { BACKEND_URL } from '../app/const';
 
 interface ProfilePictureProps {
   imageUri: string | null;
@@ -37,7 +38,7 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({ imageUri, setImageUri }
           name: 'profile_picture.jpg',
         } as any);
 
-        const response = await fetch('http://172.18.128.1:8080/safe_srilanka/database/profile/uploadImage', {
+        const response = await fetch(`${BACKEND_URL}/database/profile/uploadImage`, {
           method: 'POST',
           body: formData,
           headers: {
@@ -63,13 +64,18 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({ imageUri, setImageUri }
       }
     }
   };
+  const getBackendIp = () => {
+    const url = BACKEND_URL.split('/')[2];
+    console.log(url);
+    return url;
+  };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={pickImage}> 
         {imageUri ? (
           <Image 
-            source={{ uri: `http://172.18.128.1:8080/safe_srilanka/images/${imageUri}` }} 
+            source={{ uri: `http://${getBackendIp()}/safe_srilanka/images/${imageUri}` }} 
             style={styles.image} 
           />
         ) : (
