@@ -31,7 +31,7 @@ export default function RecordingsManager() {
   const handlePlayRecording = async (recording: Recording) => {
     try {
       const { sound } = await Audio.Sound.createAsync(
-        recording.uri,
+        recording.source,
         { shouldPlay: true }
       );
       // Automatically unload the sound after playback finishes

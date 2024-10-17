@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform, Alert } from 'react-native';
 import * as TaskManager from 'expo-task-manager';
 import { Recording } from './AudioService';
+import { Asset } from 'expo-asset';
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
 
@@ -27,33 +28,42 @@ Notifications.setNotificationHandler({
 let sound: Audio.Sound | null = null;
 
 // Function to play the selected recording
-export async function playRecording(recording: Recording) {
+export const playRecording = async (recording: Recording) => {
   try {
-    if (recording.isDefault) {
-      // For default recordings, use the required asset
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        recording.uri,
-        { shouldPlay: true }
-      );
-      sound = newSound;
-      // Set looping to true for continuous playback during the call
-      await sound.setIsLoopingAsync(true);
-    } else {
-      // No user recordings; this block should never be called
-      console.warn('User recordings are not supported.');
+    console.log(`Attempting to play recording: ${recording.name}`);
+    console.log('Recording source:', recording.source);
+    
+    if (!recording.source) {
+      throw new Error('Recording source is undefined');
     }
 
-    if (Platform.OS === 'android') {
-      await Audio.setAudioModeAsync({
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-        playsInSilentModeIOS: true,
-      });
+    if (sound) {
+      console.log('Unloading existing sound.');
+      await sound.unloadAsync();
+      sound = null;
     }
+    
+    // Load the asset
+    console.log('Loading asset...');
+    const asset = Asset.fromModule(recording.source);
+    console.log('Asset created:', asset);
+    await asset.downloadAsync();
+    console.log('Asset downloaded');
+    
+    console.log('Creating new Audio.Sound...');
+    sound = new Audio.Sound();
+    console.log('Loading sound...');
+    await sound.loadAsync(asset);
+    console.log('Sound loaded successfully.');
+    await sound.setIsLoopingAsync(true);
+    console.log('Looping set. Starting playback...');
+    await sound.playAsync();
+    console.log('Playback started.');
   } catch (error) {
     console.error('Error playing recording:', error);
+    Alert.alert('Playback Error', 'Unable to play the selected recording.');
   }
-}
+};
 
 // Function to stop the fake call (stop playback and dismiss notifications)
 export const stopFakeCall = async () => {

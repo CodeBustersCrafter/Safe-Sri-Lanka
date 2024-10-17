@@ -66,7 +66,7 @@ export default function FakeCallScreen() {
         content: {
           title: 'Incoming Call',
           body: `Call from ${callerName}`,
-          data: { recording }, // Pass the selected recording data
+          data: { recordingName: recording.name }, // Pass only the name
         },
         trigger: { seconds: 1 }, // Trigger immediately
       });
@@ -79,8 +79,11 @@ export default function FakeCallScreen() {
     setIsModalVisible(false);
     setIsCallActive(true);
     startCallTimer();
-    if (selectedRecording) {
+    if (selectedRecording && selectedRecording.source) {
       playRecording(selectedRecording);
+    } else {
+      console.error('Selected recording or its source is undefined');
+      Alert.alert('Error', 'Unable to play the selected recording.');
     }
   };
 
