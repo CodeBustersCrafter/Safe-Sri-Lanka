@@ -5,8 +5,6 @@ import ballerina/io;
 import ballerina/mime;
 import ballerina/file;
 import ballerina/os;
-import safe_srilanka.dangerZoneController as dangerZoneController;
-import safe_srilanka.friendsController as friendsController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -167,10 +165,6 @@ service /safe_srilanka/database/dangerZone on apiListener {
             return { "error": "Invalid payload" };
         }
     }
-    resource function get nearby(decimal lat, decimal lon, decimal radius = 1000) returns json|error {
-        io:println("Fetching nearby danger zones");
-        return dangerZoneController:getNearbyDangerZones(lat, lon, radius);
-    }
 }
 
 // Insert current location
@@ -255,14 +249,6 @@ service /safe_srilanka/images on apiListener {
         }
 
         return response;
-    }
-}
-
-// Add this new service
-service /safe_srilanka/database/friends on apiListener {
-    resource function get nearby(int userId, decimal lat, decimal lon, decimal radius = 5) returns json|error {
-        io:println("Fetching nearby friends");
-        return friendsController:getNearbyFriends(userId, lat, lon, radius);
     }
 }
 
