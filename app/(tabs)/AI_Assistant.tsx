@@ -14,7 +14,7 @@ export default function AI_AssistantScreen() {
     setMessage('');
 
     try {
-      const response = await fetch('http://16.170.245.231:8080/safe_srilanka/ai_assistant/chat', { 
+      const response = await fetch('http://192.168.56.1:8080/safe_srilanka/ai_assistant/chat', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
