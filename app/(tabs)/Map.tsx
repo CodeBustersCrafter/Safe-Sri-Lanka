@@ -105,7 +105,15 @@ export default function MapScreen() {
   };
 
   const toggleDangerZoneMode = () => {
-    setIsDangerZoneMode(prevMode => !prevMode);
+    setIsDangerZoneMode(prevMode => {
+      if (!prevMode) {
+        // Refresh danger zones data when turning on the mode
+        if (location) {
+          fetchDangerZones(location.coords.latitude, location.coords.longitude);
+        }
+      }
+      return !prevMode;
+    });
   };
 
   return (
