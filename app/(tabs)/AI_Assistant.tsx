@@ -1,11 +1,63 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 
 export default function AI_AssistantScreen() {
-    console.log('AI_AssistantScreen Rendered');
+  const [message, setMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string; agent?: string }>>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (message.trim() === '') return;
+
+    setIsLoading(true);
+    setChatHistory(prev => [...prev, { role: 'user', content: message }]);
+    setMessage('');
+
+    try {
+      const response = await fetch('http://16.170.245.231:8080/safe_srilanka/ai_assistant/chat', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+      setChatHistory(prev => [...prev, { role: 'assistant', content: data.response, agent: data.agent }]);
+    } catch (error) {
+      console.error('Error:', error);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Sorry, there was an error processing your request.' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>AI Assistant - Coming Soon!</Text>
+      <ScrollView style={styles.chatContainer}>
+        {chatHistory.map((chat, index) => (
+          <View key={index} style={chat.role === 'user' ? styles.userMessage : styles.assistantMessage}>
+            <Text style={styles.messageText}>{chat.content}</Text>
+            {chat.agent && <Text style={styles.agentText}>Agent: {chat.agent}</Text>}
+          </View>
+        ))}
+      </ScrollView>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type your message here..."
+          onSubmitEditing={sendMessage}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage} disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.sendButtonText}>Send</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -13,11 +65,63 @@ export default function AI_AssistantScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: '#f5f5f5',
   },
-  text: {
-    fontSize: 18,
-    fontWeight: 'bold'
-  }
+  chatContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    maxWidth: '80%',
+  },
+  assistantMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E5E5EA',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    maxWidth: '80%',
+  },
+  messageText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  agentText: {
+    color: '#ffffff',
+    fontSize: 12,
+    marginTop: 5,
+    fontStyle: 'italic',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#ffffff',
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginRight: 10,
+    fontSize: 16,
+  },
+  sendButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

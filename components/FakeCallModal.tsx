@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Recording } from '../services/AudioService';
 
 interface FakeCallModalProps {
   isVisible: boolean;
@@ -18,19 +18,18 @@ const FakeCallModal: React.FC<FakeCallModalProps> = ({
   onAccept,
   onDecline,
 }) => {
-  const ringtoneRef = useRef<Audio.Sound | null>(null); // Use ref to maintain ringtone instance
-
-  const insets = useSafeAreaInsets();
+  const ringtoneRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     if (isVisible) {
       playRingtone();
+    } else {
+      stopAndUnloadRingtone();
     }
 
     return () => {
       stopAndUnloadRingtone();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   const playRingtone = async () => {
@@ -38,42 +37,39 @@ const FakeCallModal: React.FC<FakeCallModalProps> = ({
       ringtoneRef.current = new Audio.Sound();
       const ringtoneSource = require('../assets/ringtones/default_ringtone.mp3');
 
-      // Log the ringtone source to verify it's not undefined
-      console.log('Ringtone Source:', ringtoneSource);
-
       await ringtoneRef.current.loadAsync(ringtoneSource);
       await ringtoneRef.current.setIsLoopingAsync(true);
       await ringtoneRef.current.playAsync();
     } catch (error) {
-      console.log('Error playing ringtone:', error);
+      console.error('Error playing ringtone:', error);
+      Alert.alert('Error', 'Unable to play the ringtone.');
     }
   };
 
   const stopAndUnloadRingtone = async () => {
-    if (ringtoneRef.current) {
-      try {
+    try {
+      if (ringtoneRef.current) {
         await ringtoneRef.current.stopAsync();
         await ringtoneRef.current.unloadAsync();
         ringtoneRef.current = null;
-      } catch (e) {
-        console.log('Error stopping/unloading ringtone:', e);
       }
+    } catch (error) {
+      console.error('Error stopping ringtone:', error);
     }
   };
 
   return (
     <Modal isVisible={isVisible} backdropOpacity={0.5} style={styles.modal}>
-      <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-        <StatusBar hidden={true} />
-        <Ionicons name="call" size={64} color="#4CAF50" />
+      <View style={styles.container}>
+        <Ionicons name="person-circle-outline" size={64} color="#333" />
         <Text style={styles.callerName}>{callerName}</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.declineButton} onPress={onDecline}>
-            <Ionicons name="call-outline" size={32} color="#FF5252" />
+            <Ionicons name="close-circle" size={50} color="#D32F2F" />
             <Text style={styles.buttonText}>Decline</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
-            <Ionicons name="call-outline" size={32} color="#4CAF50" />
+            <Ionicons name="call" size={50} color="#4CAF50" />
             <Text style={styles.buttonText}>Accept</Text>
           </TouchableOpacity>
         </View>

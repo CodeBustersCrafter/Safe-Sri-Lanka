@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,40 +7,46 @@ interface CallActiveModalProps {
   isVisible: boolean;
   callDuration: number;
   onEndCall: () => void;
-  onMute: () => void;
-  onAddCall: () => void;
 }
 
 const CallActiveModal: React.FC<CallActiveModalProps> = ({
   isVisible,
   callDuration,
   onEndCall,
-  onMute,
-  onAddCall,
 }) => {
+  const [isMuted, setIsMuted] = useState(false);
+
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
   };
 
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
+    // Since this is a fake mute, there's no actual audio handling.
+    // In a real scenario, you'd handle audio streams here.
+  };
+
   return (
     <Modal isVisible={isVisible} backdropOpacity={0.5} style={styles.modal}>
       <View style={styles.container}>
-        <Text style={styles.status}>Call in Progress</Text>
-        <Text style={styles.duration}>{formatDuration(callDuration)}</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.iconButton} onPress={onMute}>
-            <Ionicons name="mic-off-outline" size={32} color="#4CAF50" />
-            <Text style={styles.buttonText}>Mute</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={onAddCall}>
-            <Ionicons name="add-outline" size={32} color="#4CAF50" />
-            <Text style={styles.buttonText}>Add Call</Text>
+        <Ionicons name="call" size={64} color="#4CAF50" />
+        <Text style={styles.callDuration}>{formatDuration(callDuration)}</Text>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.muteButton} onPress={toggleMute}>
+            <Ionicons
+              name={isMuted ? 'mic-off' : 'mic'}
+              size={36}
+              color={isMuted ? '#D32F2F' : '#4CAF50'}
+            />
+            <Text style={styles.buttonText}>
+              {isMuted ? 'Muted' : 'Mute'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.endCallButton} onPress={onEndCall}>
-            <Ionicons name="call-sharp" size={32} color="#fff" />
-            <Text style={styles.endCallText}>End Call</Text>
+            <Ionicons name="call-sharp" size={48} color="white" />
+            <Text style={styles.buttonText}>End Call</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -55,45 +61,51 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   container: {
-    backgroundColor: '#333', // Dark background
+    backgroundColor: 'white',
     padding: 30,
     alignItems: 'center',
     borderRadius: 20,
-    minWidth: '80%',
+    width: '80%', // Adjust width as needed
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  status: {
+  callDuration: {
     fontSize: 24,
-    color: '#fff',
     fontWeight: 'bold',
+    marginVertical: 20,
+    color: '#333',
   },
-  duration: {
-    fontSize: 20,
-    color: '#fff',
-    marginVertical: 10,
-  },
-  buttonContainer: {
+  buttonsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     marginTop: 20,
   },
-  iconButton: {
+  muteButton: {
+    flexDirection: 'column',
     alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    marginTop: 5,
-    fontSize: 16,
   },
   endCallButton: {
+    flexDirection: 'row',
+    backgroundColor: '#D32F2F',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 25,
     alignItems: 'center',
-    backgroundColor: '#D32F2F', // Red background for End Call
-    padding: 10,
-    borderRadius: 50,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-  endCallText: {
-    color: '#fff',
-    marginTop: 5,
-    fontSize: 16,
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginLeft: 8,
   },
 });
 
