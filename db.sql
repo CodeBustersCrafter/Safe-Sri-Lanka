@@ -66,6 +66,17 @@ CREATE TABLE `relationship` (
   FOREIGN KEY (`user2`) REFERENCES `profile`(`id`)
 );
 
+CREATE TABLE `sos_signal` (
+  `id` int AUTO_INCREMENT,
+  `sender_id` int,
+  `lat` decimal(10,8),
+  `lon` decimal(10,8),
+  `timestamp` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `is_active` boolean DEFAULT TRUE,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`sender_id`) REFERENCES `profile`(`id`)
+);
+
 USE safe_sri_lanka;
 
 -- Sahan Mudunkotowa (already provided)

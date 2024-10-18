@@ -7,6 +7,8 @@ import ballerina/file;
 import ballerina/os;
 import safe_srilanka.dangerZoneController as dangerZoneController;
 import safe_srilanka.friendsController as friendsController;
+import ballerina/websocket;
+import safe_srilanka.SOSController as sosController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
@@ -266,7 +268,51 @@ service /safe_srilanka/images on apiListener {
     }
 }
 
+// WebSocket service
+service /safe_srilanka/ws on new websocket:Listener(9090) {
+    resource function get .(@http:Header {name: "sec-websocket-protocol"} string subProtocol) returns websocket:Service|websocket:Error {
+        return new SOSWebSocketService();
+    }
+}
 
+service class SOSWebSocketService {
+    *websocket:Service;
+
+    remote function onOpen(websocket:Caller caller) returns error? {
+        sosController:connections[caller.getConnectionId()] = caller;
+        io:println("New client connected: " + caller.getConnectionId());
+    }
+
+    remote function onClose(websocket:Caller caller) returns error? {
+        _ = sosController:connections.remove(caller.getConnectionId());
+        io:println("Client disconnected: " + caller.getConnectionId());
+    }
+
+    remote function onMessage(websocket:Caller caller, json data) returns error? {
+        // Handle incoming messages if needed
+    }
+}
+
+// SOS HTTP service
+service /safe_srilanka/sos on apiListener {
+    resource function post send(http:Request req) returns json|error {
+        io:println("Sending SOS signal");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int senderId = check int:fromString((check payload.senderId).toString());
+            decimal lat = check decimal:fromString((check payload.lat).toString());
+            decimal lon = check decimal:fromString((check payload.lon).toString());
+            return sosController:sendSOSSignal(senderId, lat, lon);
+        } else {
+            return { "status": "error", "message": "Invalid payload" };
+        }
+    }
+
+    resource function get details/[int sosId]() returns json|error {
+        io:println("Fetching SOS details for ID: " + sosId.toString());
+        return sosController:getSOSDetails(sosId);
+    }
+}
 
 public function main() returns error? {
     io:println("Starting Safe Sri Lanka API server on port " + PORT.toString());
