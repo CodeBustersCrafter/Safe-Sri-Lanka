@@ -4,7 +4,7 @@ import ballerina/io;
 configurable string pythonServiceUrl = "http://localhost:8000";
 
 public function chatWithAI(string message) returns json|error {
-    http:Client pythonClient = check new (pythonServiceUrl);
+    http:Client pythonClient = check new (pythonServiceUrl,timeout = 1200);
 
     json payload = {
         "message": message
