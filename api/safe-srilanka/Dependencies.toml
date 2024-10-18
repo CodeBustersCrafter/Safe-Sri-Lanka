@@ -315,6 +315,29 @@ dependencies = [
 ]
 
 [[package]]
+org = "ballerina"
+name = "websocket"
+version = "2.12.0"
+dependencies = [
+	{org = "ballerina", name = "auth"},
+	{org = "ballerina", name = "constraint"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "jwt"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.runtime"},
+	{org = "ballerina", name = "lang.string"},
+	{org = "ballerina", name = "lang.value"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "oauth2"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerina", packageName = "websocket", moduleName = "websocket"}
+]
+
+[[package]]
 org = "ballerinai"
 name = "observe"
 version = "0.0.0"
@@ -363,16 +386,20 @@ dependencies = [
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "random"},
 	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "websocket"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"},
 	{org = "ballerinax", name = "mysql.driver"}
 ]
 modules = [
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBot"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.controllers"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.dangerZoneController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.database"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.databaseController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.friendsController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.models"}
 ]
 
