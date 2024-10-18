@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.0"
+distribution-version = "2201.10.1"
 
 [[package]]
 org = "ballerina"
@@ -313,6 +313,9 @@ version = "2.4.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
+modules = [
+	{org = "ballerina", packageName = "url", moduleName = "url"}
+]
 
 [[package]]
 org = "ballerina"
@@ -386,6 +389,7 @@ dependencies = [
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "random"},
 	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "url"},
 	{org = "ballerina", name = "websocket"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"},
@@ -393,6 +397,7 @@ dependencies = [
 ]
 modules = [
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SMSController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBot"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.controllers"},

@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 // Define the backend URL based on the platform
 export const BACKEND_URL = Platform.select({
   // Fallback for web or other platforms
-  default: 'http://192.168.56.1:8080/safe_srilanka',
+  default: 'http://192.168.1.2:8080/safe_srilanka',
 
 });
 
