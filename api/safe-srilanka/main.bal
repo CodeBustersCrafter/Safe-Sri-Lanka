@@ -7,7 +7,7 @@ import ballerina/file;
 import ballerina/os;
 import safe_srilanka.dangerZoneController as dangerZoneController;
 import safe_srilanka.friendsController as friendsController;
-import ballerina/websocket;
+// import ballerina/websocket;
 import safe_srilanka.SOSController as sosController;
 
 // Define the port for the HTTP listener
@@ -269,29 +269,29 @@ service /safe_srilanka/images on apiListener {
 }
 
 // WebSocket service
-service /safe_srilanka/ws on new websocket:Listener(9090) {
-    resource function get .(@http:Header {name: "sec-websocket-protocol"} string subProtocol) returns websocket:Service|websocket:Error {
-        return new SOSWebSocketService();
-    }
-}
+// service /safe_srilanka/ws on new websocket:Listener(9090) {
+//     resource function get .(@http:Header {name: "sec-websocket-protocol"} string subProtocol) returns websocket:Service|websocket:Error {
+//         return new SOSWebSocketService();
+//     }
+// }
 
-service class SOSWebSocketService {
-    *websocket:Service;
+// service class SOSWebSocketService {
+//     *websocket:Service;
 
-    remote function onOpen(websocket:Caller caller) returns error? {
-        sosController:connections[caller.getConnectionId()] = caller;
-        io:println("New client connected: " + caller.getConnectionId());
-    }
+//     remote function onOpen(websocket:Caller caller) returns error? {
+//         sosController:connections[caller.getConnectionId()] = caller;
+//         io:println("New client connected: " + caller.getConnectionId());
+//     }
 
-    remote function onClose(websocket:Caller caller) returns error? {
-        _ = sosController:connections.remove(caller.getConnectionId());
-        io:println("Client disconnected: " + caller.getConnectionId());
-    }
+//     remote function onClose(websocket:Caller caller) returns error? {
+//         _ = sosController:connections.remove(caller.getConnectionId());
+//         io:println("Client disconnected: " + caller.getConnectionId());
+//     }
 
-    remote function onMessage(websocket:Caller caller, json data) returns error? {
-        // Handle incoming messages if needed
-    }
-}
+//     remote function onMessage(websocket:Caller caller, json data) returns error? {
+//         // Handle incoming messages if needed
+//     }
+// }
 
 // SOS HTTP service
 service /safe_srilanka/sos on apiListener {

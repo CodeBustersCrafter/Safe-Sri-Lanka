@@ -2,6 +2,7 @@ import ballerinax/mysql;
 import ballerina/sql;
 import ballerina/io;
 import ballerina/websocket;
+// import safe_srilanka.SMSController as SMSController;
 
 configurable string dbUser = "root";
 configurable string dbPassword = "root";
@@ -74,36 +75,31 @@ function getRecipientsForSOS(int senderId, decimal lat, decimal lon) returns jso
             AllRecipients.push(entry.toJson());
         };
 
+    io:println(AllRecipients);
     return AllRecipients;
 }
 
 function sendSMSMessages(json[] recipients, int sosId, int senderId, decimal lat, decimal lon) returns error? {
-    // Implement SMS sending logic here
-    // You may need to use a third-party SMS service API
     io:println("Sending SMS messages for SOS ID: " + sosId.toString());
     
-    string message = string `SOS Alert! Your friend (ID: ${senderId}) needs help. Location: ${lat}, ${lon}. SOS ID: ${sosId}`;
+    // string message = string `SOS Alert! Your friend (ID: ${senderId}) needs help. Location: ${lat}, ${lon}. SOS ID: ${sosId}`;
     
-    if (recipients is json[]) {
-        foreach var recipient in recipients {
-            if (recipient is map<json>) {
-                json|error mobileJson = recipient.mobile;
-                if (mobileJson is string) {
-                    // In a real implementation, you would use an SMS API here
-                    // For now, we'll just print the message
-                    io:println("Sending SMS to " + mobileJson + ": " + message);
-                }
-            }
-        }
-    }
+    // foreach var recipient in recipients {
+    //     if (recipient is map<json>) {
+    //         string? mobileJson = check recipient.mobile;
+    //         if (mobileJson is string) {
+    //             check SMSController:sendSMS(mobileJson, message);
+    //         }
+    //     }
+    // }
     
-    io:println("SMS messages sent successfully for SOS ID: " + sosId.toString());
+    io:println("SMS messages sent successfully for SOS ID: ", sosId.toString());
 }
 
-function sendWhatsAppMessages(json recipients, int sosId, int senderId, decimal lat, decimal lon) returns error? {
+function sendWhatsAppMessages(json[] recipients, int sosId, int senderId, decimal lat, decimal lon) returns error? {
     // Implement WhatsApp sending logic here
     // You may need to use WhatsApp Business API or a third-party service
-    io:println("Sending WhatsApp messages for SOS ID: " + sosId.toString());
+    io:println("Sending WhatsApp messages for SOS ID: ", sosId.toString());
 }
 
 public function getSOSDetails(int sosId) returns json|error {
@@ -123,4 +119,3 @@ public function getSOSDetails(int sosId) returns json|error {
         return { "status": "error", "message": "SOS signal not found" };
     }
 }
-
