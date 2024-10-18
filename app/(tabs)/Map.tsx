@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getNearbyDangerZones } from '../apiCalls/dangerZoneApi';
 import { getNearbyFriends } from '../apiCalls/friendsApi';
+import { getNearbySOSSignals } from '../apiCalls/sosApi'; // Add this import
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,6 +28,16 @@ interface Friend {
   distance: number;
 }
 
+interface SOSSignal {
+  id: number;
+  sender_id: number;
+  sender_name: string;
+  lat: number;
+  lon: number;
+  timestamp: string;
+  distance: number;
+}
+
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -37,6 +48,7 @@ export default function MapScreen() {
   const [isDangerZoneMode, setIsDangerZoneMode] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isFriendMode, setIsFriendMode] = useState(false);
+  const [sosSignals, setSOSSignals] = useState<SOSSignal[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -90,6 +102,16 @@ export default function MapScreen() {
     }
   };
 
+  const fetchSOSSignals = async (lat: number, lon: number) => {
+    try {
+      const signals = await getNearbySOSSignals(lat, lon);
+      setSOSSignals(signals);
+      console.log('Fetched SOS signals:', signals);
+    } catch (error) {
+      console.error('Failed to fetch nearby SOS signals:', error);
+    }
+  };
+
   const updateLocation = useCallback((newLocation: Location.LocationObject) => {
     setLocation(newLocation);
     fetchCity(newLocation);
@@ -99,7 +121,11 @@ export default function MapScreen() {
         fetchFriends(parseInt(userId), newLocation.coords.latitude, newLocation.coords.longitude);
       }
     });
-  }, []);
+    if (true) {
+      console.log('Fetching SOS signals');
+      fetchSOSSignals(newLocation.coords.latitude, newLocation.coords.longitude);
+    }
+  }, [isTracking]);
 
   const toggleTracking = useCallback(() => {
     setIsTracking((prevIsTracking) => {
@@ -220,6 +246,21 @@ export default function MapScreen() {
               />
             </Marker>
           ))}
+          {isTracking && sosSignals.map((signal: SOSSignal) => (
+            <Marker
+              key={`sos-${signal.id}`}
+              coordinate={{
+                latitude: signal.lat,
+                longitude: signal.lon,
+              }}
+              title={`SOS: ${signal.sender_name}`}
+              description={`Distance: ${signal.distance.toFixed(2)} km, Time: ${new Date(signal.timestamp).toLocaleString()}`}
+            >
+              <View style={styles.sosMarker}>
+                <Ionicons name="warning" size={24} color="red" />
+              </View>
+            </Marker>
+          ))}
         </MapView>
       )}
       {city && (
@@ -336,5 +377,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 8,
     borderRadius: 4,
+  },
+  sosMarker: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: 'red',
   },
 });

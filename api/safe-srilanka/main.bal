@@ -300,8 +300,8 @@ service /safe_srilanka/sos on apiListener {
         var payload = req.getJsonPayload();
         if (payload is json) {
             int senderId = check int:fromString((check payload.senderId).toString());
-            decimal lat = check decimal:fromString((check payload.lat).toString());
-            decimal lon = check decimal:fromString((check payload.lon).toString());
+            float lat = check float:fromString((check payload.lat).toString());
+            float lon = check float:fromString((check payload.lon).toString());
             return sosController:sendSOSSignal(senderId, lat, lon);
         } else {
             return { "status": "error", "message": "Invalid payload" };
@@ -311,6 +311,36 @@ service /safe_srilanka/sos on apiListener {
     resource function get details/[int sosId]() returns json|error {
         io:println("Fetching SOS details for ID: " + sosId.toString());
         return sosController:getSOSDetails(sosId);
+    }
+
+    resource function get nearby(float lat, float lon, float radius = 5) returns json|error {
+        io:println("Fetching nearby SOS signals");
+        return sosController:getNearbySOSSignals(lat, lon, radius);
+    }
+
+    resource function post generateOTP(http:Request req) returns json|error {
+        io:println("Generating OTP for SOS deactivation");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int sosId = check int:fromString((check payload.sosId).toString());
+            string otp = check sosController:generateOTP(sosId);
+            string recipientEmail = check payload.email.ensureType();
+            return sosController:sendOTPEmail(recipientEmail, otp);
+        } else {
+            return { "status": "error", "message": "Invalid payload" };
+        }
+    }
+
+    resource function post deactivate(http:Request req) returns json|error {
+        io:println("Deactivating SOS signal");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int sosId = check int:fromString((check payload.sosId).toString());
+            string otp = check payload.otp.ensureType();
+            return sosController:verifyOTPAndDeleteSOSSignal(sosId, otp);
+        } else {
+            return { "status": "error", "message": "Invalid payload" };
+        }
     }
 }
 

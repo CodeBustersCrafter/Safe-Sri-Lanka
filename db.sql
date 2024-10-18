@@ -66,6 +66,10 @@ CREATE TABLE `relationship` (
   FOREIGN KEY (`user2`) REFERENCES `profile`(`id`)
 );
 
+-- Drop the existing table if it exists
+DROP TABLE IF EXISTS `sos_signal`;
+
+-- Create the updated sos_signal table
 CREATE TABLE `sos_signal` (
   `id` int AUTO_INCREMENT,
   `sender_id` int,
@@ -73,6 +77,8 @@ CREATE TABLE `sos_signal` (
   `lon` decimal(10,8),
   `timestamp` timestamp DEFAULT CURRENT_TIMESTAMP,
   `is_active` boolean DEFAULT TRUE,
+  `otp` varchar(6),
+  `otp_timestamp` timestamp,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`sender_id`) REFERENCES `profile`(`id`)
 );
