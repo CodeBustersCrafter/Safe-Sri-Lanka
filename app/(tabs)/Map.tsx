@@ -7,7 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getNearbyDangerZones } from '../apiCalls/dangerZoneApi';
 import { getNearbyFriends } from '../apiCalls/friendsApi';
-import { getNearbySOSSignals } from '../apiCalls/sosApi'; // Add this import
+import { getNearbySOSSignals } from '../apiCalls/sosApi';
+import { getNearbyUncomfortableSignals } from '../apiCalls/uncomfortableApi'; // Add this import
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,6 +39,17 @@ interface SOSSignal {
   distance: number;
 }
 
+interface UncomfortableSignal {
+  id: number;
+  sender_id: number;
+  sender_name: string;
+  lat: number;
+  lon: number;
+  timestamp: string;
+  distance: number;
+  description: string;
+}
+
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -49,6 +61,7 @@ export default function MapScreen() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isFriendMode, setIsFriendMode] = useState(false);
   const [sosSignals, setSOSSignals] = useState<SOSSignal[]>([]);
+  const [uncomfortableSignals, setUncomfortableSignals] = useState<UncomfortableSignal[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -95,7 +108,7 @@ export default function MapScreen() {
   const fetchFriends = async (userId: number, lat: number, lon: number) => {
     try {
       const nearbyFriends = await getNearbyFriends(userId, lat, lon);
-      console.log('Fetched friends:', nearbyFriends); // Log fetched friends
+      console.log('Fetched friends:', nearbyFriends);
       setFriends(nearbyFriends);
     } catch (error) {
       console.error('Failed to fetch nearby friends:', error);
@@ -112,19 +125,30 @@ export default function MapScreen() {
     }
   };
 
+  const fetchUncomfortableSignals = async (lat: number, lon: number) => {
+    try {
+      const signals = await getNearbyUncomfortableSignals(lat, lon);
+      setUncomfortableSignals(signals);
+      console.log('Fetched Uncomfortable signals:', signals);
+    } catch (error) {
+      console.error('Failed to fetch nearby Uncomfortable signals:', error);
+    }
+  };
+
   const updateLocation = useCallback((newLocation: Location.LocationObject) => {
     setLocation(newLocation);
-    fetchCity(newLocation);
-    fetchDangerZones(newLocation.coords.latitude, newLocation.coords.longitude);
-    AsyncStorage.getItem('uid').then(userId => {
-      if (userId) {
-        fetchFriends(parseInt(userId), newLocation.coords.latitude, newLocation.coords.longitude);
-      }
-    });
-    if (true) {
-      console.log('Fetching SOS signals');
-      fetchSOSSignals(newLocation.coords.latitude, newLocation.coords.longitude);
-    }
+    console.log('Fetching SOS and Uncomfortable signals');
+    fetchSOSSignals(newLocation.coords.latitude, newLocation.coords.longitude);
+    fetchUncomfortableSignals(newLocation.coords.latitude, newLocation.coords.longitude);
+    //fetchCity(newLocation);
+    //fetchDangerZones(newLocation.coords.latitude, newLocation.coords.longitude);
+    // AsyncStorage.getItem('uid').then(userId => {
+    //   if (userId) {
+    //     fetchFriends(parseInt(userId), newLocation.coords.latitude, newLocation.coords.longitude);
+    //   }
+    // });
+    
+  
   }, [isTracking]);
 
   const toggleTracking = useCallback(() => {
@@ -142,7 +166,7 @@ export default function MapScreen() {
         trackingIntervalRef.current = setInterval(() => {
           console.log("Tracking");
           startLocationTracking(updateLocation);
-        }, 10000); // for 10 seconds
+        }, 10000*6); // for 10 seconds
       }
       return !prevIsTracking;
     });
@@ -165,9 +189,11 @@ export default function MapScreen() {
     setIsDangerZoneMode(prevMode => {
       if (!prevMode) {
         // Refresh danger zones data when turning on the mode
-        if (location) {
-          fetchDangerZones(location.coords.latitude, location.coords.longitude);
-        }
+        
+          if (location) {
+            fetchDangerZones(location.coords.latitude, location.coords.longitude);
+          }
+        
       }
       return !prevMode;
     });
@@ -258,6 +284,21 @@ export default function MapScreen() {
             >
               <View style={styles.sosMarker}>
                 <Ionicons name="warning" size={24} color="red" />
+              </View>
+            </Marker>
+          ))}
+          {isTracking && uncomfortableSignals.map((signal: UncomfortableSignal) => (
+            <Marker
+              key={`uncomfortable-${signal.id}`}
+              coordinate={{
+                latitude: signal.lat,
+                longitude: signal.lon,
+              }}
+              title={`Uncomfortable: ${signal.sender_name}`}
+              description={`${signal.description} => Distance: ${signal.distance.toFixed(2)} km, Time: ${new Date(signal.timestamp).toLocaleString()}`}
+            >
+              <View style={styles.uncomfortableMarker}>
+                <Ionicons name="alert-circle" size={24} color="orange" />
               </View>
             </Marker>
           ))}
@@ -384,5 +425,12 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 2,
     borderColor: 'red',
+  },
+  uncomfortableMarker: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: 'orange',
   },
 });

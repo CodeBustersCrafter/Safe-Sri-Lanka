@@ -9,15 +9,24 @@ import safe_srilanka.dangerZoneController as dangerZoneController;
 import safe_srilanka.friendsController as friendsController;
 // import ballerina/websocket;
 import safe_srilanka.SOSController as sosController;
+import safe_srilanka.SOSUncomfortableController as uncomfortableController;
 
 // Define the port for the HTTP listener
 const int PORT = 8080;
+const int SOS_PORT = 8083;
+const int UNCOMFORTABLE_PORT = 8082;
 
 // Use environment variable for backend IP
 string backendIp = os:getEnv("BACKEND_IP");
 
-// Create an HTTP listener
+// Create HTTP listeners
 listener http:Listener apiListener = new(PORT, config = {
+    host: backendIp
+});
+listener http:Listener sosListener = new(SOS_PORT, config = {
+    host: backendIp
+});
+listener http:Listener uncomfortableListener = new(UNCOMFORTABLE_PORT, config = {
     host: backendIp
 });
 
@@ -294,7 +303,7 @@ service /safe_srilanka/images on apiListener {
 // }
 
 // SOS HTTP service
-service /safe_srilanka/sos on apiListener {
+service /safe_srilanka/sos on sosListener {
     resource function post send(http:Request req) returns json|error {
         io:println("Sending SOS signal");
         var payload = req.getJsonPayload();
@@ -344,9 +353,79 @@ service /safe_srilanka/sos on apiListener {
     }
 }
 
+// Uncomfortable HTTP service
+service /safe_srilanka/uncomfortable on uncomfortableListener {
+    resource function post send(http:Request req) returns json|error {
+        io:println("Sending Uncomfortable signal");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int senderId = check int:fromString((check payload.senderId).toString());
+            float lat = check float:fromString((check payload.lat).toString());
+            float lon = check float:fromString((check payload.lon).toString());
+            string description = check payload.description.ensureType();
+            return uncomfortableController:sendUncomfortableSignal(senderId, lat, lon, description);
+        } else {
+            return { "status": "error", "message": "Invalid payload" };
+        }
+    }
+
+    resource function get details/[int uncomfortableId]() returns json|error {
+        io:println("Fetching Uncomfortable details for ID: " + uncomfortableId.toString());
+        return uncomfortableController:getUncomfortableDetails(uncomfortableId);
+    }
+
+    resource function get nearby(float lat, float lon, float radius = 5) returns json|error {
+        io:println("Fetching nearby Uncomfortable signals");
+        return uncomfortableController:getNearbyUncomfortableSignals(lat, lon, radius);
+    }
+
+    resource function post deactivate(http:Request req) returns json|error {
+        io:println("Deactivating Uncomfortable signal");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
+            return uncomfortableController:deactivateUncomfortableSignal(uncomfortableId);
+        } else {
+            return { "status": "error", "message": "Invalid payload" };
+        }
+    }
+
+    // resource function post generateOTP(http:Request req) returns json|error {
+    //     io:println("Generating OTP for Uncomfortable deactivation");
+    //     var payload = req.getJsonPayload();
+    //     if (payload is json) {
+    //         int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
+    //         string otp = check uncomfortableController:generateOTP(uncomfortableId);
+    //         string recipientEmail = check payload.email.ensureType();
+    //         return uncomfortableController:sendOTPEmail(recipientEmail, otp);
+    //     } else {
+    //         return { "status": "error", "message": "Invalid payload" };
+    //     }
+    // }
+
+    // resource function post deactivate(http:Request req) returns json|error {
+    //     io:println("Deactivating Uncomfortable signal");
+    //     var payload = req.getJsonPayload();
+    //     if (payload is json) {
+    //         int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
+    //         string otp = check payload.otp.ensureType();
+    //         return uncomfortableController:verifyOTPAndDeleteUncomfortableSignal(uncomfortableId, otp);
+    //     } else {
+    //         return { "status": "error", "message": "Invalid payload" };
+    //     }
+    // }
+}
+
+
+
 public function main() returns error? {
     io:println("Starting Safe Sri Lanka API server on port " + PORT.toString());
-    // Start the HTTP listener
+    // Start the HTTP listeners
     check apiListener.'start();
-    io:println("Safe Sri Lanka API server started successfully");
+    check sosListener.'start();
+    check uncomfortableListener.'start();
+    io:println("Safe Sri Lanka API server started successfully on ports:");
+    io:println("  - Main API: " + PORT.toString());
+    io:println("  - SOS: " + SOS_PORT.toString());
+    io:println("  - Uncomfortable: " + UNCOMFORTABLE_PORT.toString());
 }

@@ -399,6 +399,7 @@ modules = [
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SMSController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSUncomfortableController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBot"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.controllers"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.dangerZoneController"},

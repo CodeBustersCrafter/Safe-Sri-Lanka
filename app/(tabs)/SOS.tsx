@@ -5,15 +5,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BACKEND_URL } from '../const';
 import { LocationObject } from 'expo-location';
 import { generateOTP, deactivateSOS, sendSOSSignal } from '../apiCalls/sosApi';
-
+import { deactivateUncomfortableSignal, sendUncomfortableSignal } from '../apiCalls/uncomfortableApi';
 const { height } = Dimensions.get('window');
 
 export default function SOSScreen() {
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [isEmergencyActive, setIsEmergencyActive] = useState(false);
+  const [isUncomfortableActive, setIsUncomfortableActive] = useState(false);
   const [sosId, setSosId] = useState<number | null>(null);
+  const [uncomfortableId, setUncomfortableId] = useState<number | null>(null);
   const [otp, setOtp] = useState(''); 
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [uncomfortableDescription, setUncomfortableDescription] = useState('');
+  const [showUncomfortableInput, setShowUncomfortableInput] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -100,9 +104,66 @@ export default function SOSScreen() {
     }
   };
 
-  const handleUncomfortablePress = () => {
-    // Implement uncomfortable situation handling
-    console.log('Uncomfortable Situation Button Pressed');
+  const handleUncomfortablePress = async () => {
+    if (isUncomfortableActive) {
+      // Deactivation process for uncomfortable signal
+      Alert.alert(
+        'Deactivate Uncomfortable Signal',
+        'Are you sure you want to deactivate your uncomfortable signal?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          },
+          {
+            text: 'Yes',
+            onPress: () => {
+              deactivateUncomfortableSignal(uncomfortableId!);
+              setIsUncomfortableActive(false);
+              setUncomfortableId(null);
+              setUncomfortableDescription('');
+              Alert.alert('Uncomfortable Signal Deactivated', 'Your uncomfortable signal has been deactivated.');
+            }
+          }
+        ]
+      );
+    } else {
+      // Activation process for uncomfortable signal
+      setShowUncomfortableInput(true);
+    }
+  };
+
+  const handleUncomfortableSubmit = async () => {
+    if (!location) {
+      Alert.alert('Error', 'Unable to get your current location');
+      return;
+    }
+
+    const userId = await AsyncStorage.getItem('uid');
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found');
+      return;
+    }
+
+    try {
+      const response = await sendUncomfortableSignal(
+        Number(userId),
+        location.coords.latitude,
+        location.coords.longitude,
+        uncomfortableDescription
+      );
+      if (response.status === 'success') {
+        setIsUncomfortableActive(true);
+        setUncomfortableId(response.uncomfortableId);
+        setShowUncomfortableInput(false);
+        Alert.alert('Uncomfortable Situation Reported', 'Your report has been sent.');
+      } else {
+        Alert.alert('Error', 'Failed to send uncomfortable situation report');
+      }
+    } catch (error) {
+      console.error('Error sending uncomfortable signal:', error);
+      Alert.alert('Error', 'Failed to send uncomfortable situation report');
+    }
   };
 
   return (
@@ -131,9 +192,28 @@ export default function SOSScreen() {
         </View>
       )}
 
-      <TouchableOpacity style={styles.uncomfortableButton} onPress={handleUncomfortablePress}>
-        <Text style={styles.buttonText}>Uncomfortable Situation</Text>
+      <TouchableOpacity 
+        style={[styles.uncomfortableButton, isUncomfortableActive && styles.activeUncomfortableButton]} 
+        onPress={handleUncomfortablePress}
+      >
+        <Text style={styles.buttonText}>
+          {isUncomfortableActive ? 'Deactivate Uncomfortable' : 'Uncomfortable Situation'}
+        </Text>
       </TouchableOpacity>
+
+      {showUncomfortableInput && (
+        <View style={styles.uncomfortableInputContainer}>
+          <TextInput
+            style={styles.uncomfortableInput}
+            value={uncomfortableDescription}
+            onChangeText={setUncomfortableDescription}
+            placeholder="Describe the uncomfortable situation"
+          />
+          <TouchableOpacity style={styles.uncomfortableSubmitButton} onPress={handleUncomfortableSubmit}>
+            <Text style={styles.uncomfortableSubmitText}>Submit Report</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -169,6 +249,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  activeUncomfortableButton: {
+    backgroundColor: '#FFA500',
+  },
   buttonText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -192,6 +275,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   otpSubmitText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  uncomfortableInputContainer: {
+    width: '90%',
+    marginTop: 20,
+  },
+  uncomfortableInput: {
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    height: 40,
+  },
+  uncomfortableSubmitButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  uncomfortableSubmitText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',

@@ -4,7 +4,16 @@ import { Platform } from 'react-native';
 export const BACKEND_URL = Platform.select({
   // Fallback for web or other platforms
   default: 'http://192.168.1.2:8080/safe_srilanka',
+});
 
+export const BACKEND_URL_SOS = Platform.select({
+  // Fallback for web or other platforms
+  default: 'http://192.168.1.2:8083/safe_srilanka',
+});
+
+export const BACKEND_URL_UNCOMFORTABLE = Platform.select({
+  // Fallback for web or other platforms
+  default: 'http://192.168.1.2:8082/safe_srilanka',
 });
 
 // If you have a production URL, you can add a condition like this:

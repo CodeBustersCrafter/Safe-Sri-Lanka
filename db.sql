@@ -83,6 +83,22 @@ CREATE TABLE `sos_signal` (
   FOREIGN KEY (`sender_id`) REFERENCES `profile`(`id`)
 );
 
+-- Drop the existing table if it exists
+DROP TABLE IF EXISTS `uncomfortable_signal`;
+
+-- Create the uncomfortable_signal table
+CREATE TABLE `uncomfortable_signal` (
+  `id` int AUTO_INCREMENT,
+  `sender_id` int,
+  `lat` decimal(10,8),
+  `lon` decimal(10,8),
+  `timestamp` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `description` varchar(250),
+  `is_active` boolean DEFAULT TRUE,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`sender_id`) REFERENCES `profile`(`id`)
+);
+
 USE safe_sri_lanka;
 
 -- Sahan Mudunkotowa (already provided)

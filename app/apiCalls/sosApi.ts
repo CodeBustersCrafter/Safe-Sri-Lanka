@@ -1,8 +1,8 @@
-import { BACKEND_URL } from '../const';
+import { BACKEND_URL_SOS } from '../const';
 
 export const sendSOSSignal = async (senderId: number, lat: number, lon: number) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/sos/send`, {
+    const response = await fetch(`${BACKEND_URL_SOS}/sos/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ export const sendSOSSignal = async (senderId: number, lat: number, lon: number) 
 
 export const getNearbySOSSignals = async (lat: number, lon: number, radius: number = 5) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/sos/nearby?lat=${lat}&lon=${lon}&radius=${radius}`);
+    const response = await fetch(`${BACKEND_URL_SOS}/sos/nearby?lat=${lat}&lon=${lon}&radius=${radius}`);
     if (!response.ok) {
       throw new Error('Failed to fetch nearby SOS signals');
     }
@@ -40,7 +40,7 @@ export const getNearbySOSSignals = async (lat: number, lon: number, radius: numb
 
 export const generateOTP = async (sosId: number, email: string) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/sos/generateOTP`, {
+    const response = await fetch(`${BACKEND_URL_SOS}/sos/generateOTP`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export const generateOTP = async (sosId: number, email: string) => {
 
 export const deactivateSOS = async (sosId: number, otp: string) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/sos/deactivate`, {
+    const response = await fetch(`${BACKEND_URL_SOS}/sos/deactivate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
