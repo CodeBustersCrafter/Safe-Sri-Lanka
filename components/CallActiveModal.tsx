@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width, height } = Dimensions.get('window');
 
 interface CallActiveModalProps {
   isVisible: boolean;
@@ -15,6 +17,7 @@ const CallActiveModal: React.FC<CallActiveModalProps> = ({
   onEndCall,
 }) => {
   const [isMuted, setIsMuted] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -22,90 +25,75 @@ const CallActiveModal: React.FC<CallActiveModalProps> = ({
     return `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
   };
 
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-    // Since this is a fake mute, there's no actual audio handling.
-    // In a real scenario, you'd handle audio streams here.
-  };
+  const toggleMute = () => setIsMuted((prev) => !prev);
+  const toggleSpeaker = () => setIsSpeakerOn((prev) => !prev);
 
   return (
-    <Modal isVisible={isVisible} backdropOpacity={0.5} style={styles.modal}>
-      <View style={styles.container}>
-        <Ionicons name="call" size={64} color="#4CAF50" />
-        <Text style={styles.callDuration}>{formatDuration(callDuration)}</Text>
+    <Modal isVisible={isVisible} backdropOpacity={1} style={styles.modal}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.callerInfo}>
+          <Ionicons name="person-circle-outline" size={100} color="#FFF" />
+          <Text style={styles.callDuration}>{formatDuration(callDuration)}</Text>
+        </View>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.muteButton} onPress={toggleMute}>
-            <Ionicons
-              name={isMuted ? 'mic-off' : 'mic'}
-              size={36}
-              color={isMuted ? '#D32F2F' : '#4CAF50'}
-            />
-            <Text style={styles.buttonText}>
-              {isMuted ? 'Muted' : 'Mute'}
-            </Text>
+          <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
+            <Ionicons name={isMuted ? 'mic-off' : 'mic'} size={30} color="#FFF" />
+            <Text style={styles.buttonText}>{isMuted ? 'Unmute' : 'Mute'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.endCallButton} onPress={onEndCall}>
-            <Ionicons name="call-sharp" size={48} color="white" />
-            <Text style={styles.buttonText}>End Call</Text>
+          <TouchableOpacity style={styles.actionButton} onPress={toggleSpeaker}>
+            <Ionicons name={isSpeakerOn ? 'volume-high' : 'volume-medium'} size={30} color="#FFF" />
+            <Text style={styles.buttonText}>{isSpeakerOn ? 'Speaker Off' : 'Speaker On'}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        <TouchableOpacity style={styles.endCallButton} onPress={onEndCall}>
+          <Ionicons name="call" size={40} color="#FFF" style={styles.rotatedIcon} />
+        </TouchableOpacity>
+      </SafeAreaView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   modal: {
-    justifyContent: 'center', // Center the modal vertically
-    alignItems: 'center', // Center the modal horizontally
     margin: 0,
   },
   container: {
-    backgroundColor: 'white',
-    padding: 30,
+    flex: 1,
+    backgroundColor: '#2c3e50',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderRadius: 20,
-    width: '80%', // Adjust width as needed
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    paddingVertical: 50,
+  },
+  callerInfo: {
+    alignItems: 'center',
   },
   callDuration: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginVertical: 20,
-    color: '#333',
+    color: '#FFF',
+    marginTop: 20,
   },
   buttonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
-    marginTop: 20,
   },
-  muteButton: {
-    flexDirection: 'column',
+  actionButton: {
     alignItems: 'center',
   },
   endCallButton: {
-    flexDirection: 'row',
-    backgroundColor: '#D32F2F',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 25,
+    backgroundColor: '#e74c3c',
+    borderRadius: 50,
+    padding: 20,
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginLeft: 8,
+    color: '#FFF',
+    marginTop: 5,
+    fontSize: 14,
+  },
+  rotatedIcon: {
+    transform: [{ rotate: '135deg' }],
   },
 });
 
