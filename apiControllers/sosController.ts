@@ -1,6 +1,14 @@
 import { BACKEND_URL_SOS } from '../app/const';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const sendSOSSignal = async (senderId: string, lat: number, lon: number, userName: string, locationName: string) => {
+  const isBackendCallEnabled = await AsyncStorage.getItem('backendCallEnabled');
+  let isBackendCallEnabledValue = 'false';
+  if (isBackendCallEnabled === null) {
+    isBackendCallEnabledValue = 'false';
+  }else if(isBackendCallEnabled === 'true'){
+    isBackendCallEnabledValue = 'true';
+  }
   const response = await fetch(`${BACKEND_URL_SOS}/sos/send`, {
     method: 'POST',
     headers: {
@@ -11,7 +19,8 @@ export const sendSOSSignal = async (senderId: string, lat: number, lon: number, 
       lat: lat.toString(),
       lon: lon.toString(),
       userName,
-      locationName
+      locationName,
+      isBackendCallEnabled: isBackendCallEnabledValue
     }),
   });
   return await response.json();

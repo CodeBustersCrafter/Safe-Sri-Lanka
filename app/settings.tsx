@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Settings = () => {
   const [friendRange, setFriendRange] = useState('5');
   const [dangerZoneRange, setDangerZoneRange] = useState('10');
+  const [isBackendCallEnabled, setIsBackendCallEnabled] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -17,6 +18,8 @@ const Settings = () => {
       const storedDangerZoneRange = await AsyncStorage.getItem('dangerZoneRange');
       if (storedFriendRange) setFriendRange(storedFriendRange);
       if (storedDangerZoneRange) setDangerZoneRange(storedDangerZoneRange);
+      const storedBackendCallEnabled = await AsyncStorage.getItem('backendCallEnabled');
+      if (storedBackendCallEnabled) setIsBackendCallEnabled(storedBackendCallEnabled === 'true');
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -38,6 +41,12 @@ const Settings = () => {
   const handleDangerZoneRangeChange = (value: string) => {
     setDangerZoneRange(value);
     saveSettings('dangerZoneRange', value);
+  };
+
+  const toggleBackendCall = () => {
+    const newValue = !isBackendCallEnabled;
+    setIsBackendCallEnabled(newValue);
+    saveSettings('backendCallEnabled', newValue.toString());
   };
 
   return (
@@ -69,6 +78,20 @@ const Settings = () => {
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Premium SOS Call Settings</Text>
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleText}>Enable Call & SMS services</Text>
+          <Switch
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={isBackendCallEnabled ? "#f5dd4b" : "#f4f3f4"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleBackendCall}
+            value={isBackendCallEnabled}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Help</Text>
         <TouchableOpacity style={styles.helpItem}>
           <Ionicons name="information-circle-outline" size={24} color="#007AFF" />
@@ -88,6 +111,15 @@ const Settings = () => {
 };
 
 const styles = StyleSheet.create({
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  toggleText: {
+    fontSize: 16,
+    color: '#3A3A3C',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F2F2F7',

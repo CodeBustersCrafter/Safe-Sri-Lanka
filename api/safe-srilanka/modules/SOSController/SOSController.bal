@@ -16,6 +16,7 @@ public function sendSOSSignal(json payload) returns json|error {
     decimal lon = check decimal:fromString((check payload.lon).toString());
     string userName = check payload.userName;
     string locationName = check payload.locationName;
+    string isBackendCallEnabled = check payload.isBackendCallEnabled;
 
     var result = check SOSModel:insertSOSSignal(senderId, lat, lon);
     int sosId = <int>result.lastInsertId;
@@ -31,7 +32,11 @@ public function sendSOSSignal(json payload) returns json|error {
     log:printInfo(string `Found ${recipients.length()} recipients for SOS signal`);
 
     // Send SMS
-    _ = check sendSMSMessage(userName, locationName, lat, lon);
+    if (isBackendCallEnabled.toString() == "true") {
+        _ = check sendSMSMessage(userName, locationName, lat, lon);
+    }else{
+        log:printInfo("Backend call is disabled");
+    }
 
     // Broadcast SOS signal to all connected WebSocket clients
     models:SOSMessage sosMessage = {
