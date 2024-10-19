@@ -3,7 +3,7 @@ import ballerinax/mysql;
 
 // MySQL Database configuration
 configurable string dbUser = "root";
-configurable string dbPassword = "root";
+configurable string dbPassword = "Akindu/19275";
 configurable string dbHost = "localhost";
 configurable int dbPort = 3306;
 configurable string dbName = "safe_sri_lanka";

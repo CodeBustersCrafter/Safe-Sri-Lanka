@@ -1,8 +1,8 @@
 import { sendSOSSignal as sendSOSSignalController, getNearbySOSSignals as getNearbySOSSignalsController, generateOTP as generateOTPController, deactivateSOS as deactivateSOSController } from '../apiControllers/sosController';
 
-export const sendSOSSignal = async (senderId: string, lat: number, lon: number) => {
+export const sendSOSSignal = async (senderId: string, lat: number, lon: number, userName: string, locationName: string) => {
   try {
-    return await sendSOSSignalController(senderId, lat, lon);
+    return await sendSOSSignalController(senderId, lat, lon, userName, locationName);
   } catch (error) {
     console.error('Error sending SOS signal:', error);
     throw error;

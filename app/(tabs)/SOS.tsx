@@ -71,7 +71,15 @@ export default function SOSScreen() {
         return;
       }
       try {
-        const response = await sendSOSSignal(userId,location.coords.latitude, location.coords.longitude);
+        const userProfile = await fetchUserProfile(userId);
+        const userName = userProfile.name;
+        const response = await sendSOSSignal(
+          userId,
+          location.coords.latitude,
+          location.coords.longitude,
+          userName,
+          `${location.coords.latitude},${location.coords.longitude}`
+        );
         if (response.status === 'success') {
           setIsEmergencyActive(true);
           setSosId(response.sosId);

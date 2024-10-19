@@ -1,6 +1,6 @@
 import { BACKEND_URL_SOS } from '../app/const';
 
-export const sendSOSSignal = async (senderId: string, lat: number, lon: number) => {
+export const sendSOSSignal = async (senderId: string, lat: number, lon: number, userName: string, locationName: string) => {
   const response = await fetch(`${BACKEND_URL_SOS}/sos/send`, {
     method: 'POST',
     headers: {
@@ -9,7 +9,9 @@ export const sendSOSSignal = async (senderId: string, lat: number, lon: number) 
     body: JSON.stringify({
       senderId: senderId.toString(),
       lat: lat.toString(),
-      lon: lon.toString()
+      lon: lon.toString(),
+      userName,
+      locationName
     }),
   });
   return await response.json();

@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-const BASE_URL = 'http://192.168.1.2';
+const BASE_URL = 'exp://192.168.1.3';
 
 const HELPLINE_PORT = 8080;
 const SOS_PORT = 8083;

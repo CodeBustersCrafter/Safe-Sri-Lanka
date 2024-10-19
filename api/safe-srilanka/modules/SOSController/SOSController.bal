@@ -3,6 +3,7 @@ import ballerina/random;
 import ballerina/websocket;
 import safe_srilanka.SOSModel as SOSModel;
 import safe_srilanka.models as models;
+import ballerina/http;
 
 // WebSocket connections store
 public map<websocket:Caller> connections = {};
@@ -11,6 +12,8 @@ public function sendSOSSignal(json payload) returns json|error {
     int senderId = check int:fromString((check payload.senderId).toString());
     decimal lat = check decimal:fromString((check payload.lat).toString());
     decimal lon = check decimal:fromString((check payload.lon).toString());
+    string userName = check payload.userName;
+    string locationName = check payload.locationName;
 
     var result = check SOSModel:insertSOSSignal(senderId, lat, lon);
     int sosId = <int>result.lastInsertId;
@@ -23,9 +26,8 @@ public function sendSOSSignal(json payload) returns json|error {
             recipients.push(entry.toJson());
         };
 
-    // Send messages
-    _ = check sendSMSMessages(recipients, sosId, senderId, lat, lon);
-    _ = check sendWhatsAppMessages(recipients, sosId, senderId, lat, lon);
+    // Send SMS
+    _ = check sendSMSMessage(userName, locationName, lat, lon);
 
     // Broadcast SOS signal to all connected WebSocket clients
     models:SOSMessage sosMessage = {
@@ -42,10 +44,19 @@ public function sendSOSSignal(json payload) returns json|error {
     return { "status": "success", "message": "SOS signal sent", "sosId": sosId };
 }
 
-function sendSMSMessages(json[] recipients, int sosId, int senderId, decimal lat, decimal lon) returns error? {
-    io:println("Sending SMS messages for SOS ID: " + sosId.toString());
-    // Implement SMS sending logic here
-    io:println("SMS messages sent successfully for SOS ID: ", sosId.toString());
+function sendSMSMessage(string userName, string locationName, decimal lat, decimal lon) returns error? {
+    // Call the Python SMS service
+    http:Client smsClient = check new ("http://localhost:8000");  // Adjust the port if needed
+    json smsPayload = {
+        "userName": userName,
+        "locationName": locationName,
+        "lat": lat.toString(),
+        "lon": lon.toString()
+    };
+    http:Response smsResponse = check smsClient->post("/send-sms", smsPayload);
+    if (smsResponse.statusCode != 200) {
+        return error("Failed to send SMS");
+    }
 }
 
 function sendWhatsAppMessages(json[] recipients, int sosId, int senderId, decimal lat, decimal lon) returns error? {
