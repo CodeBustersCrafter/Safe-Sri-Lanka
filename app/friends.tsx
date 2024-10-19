@@ -96,6 +96,7 @@ export default function FriendsScreen() {
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.details}>{user.location}</Text>
         <Text style={styles.details}>{user.email}</Text>
+        <Text style={styles.details}>{user.mobile}</Text>
       </View>
       <TouchableOpacity onPress={() => handleConnect(user.id)} style={styles.connectButton}>
         <Ionicons name="add-circle-outline" size={24} color="#4c669f" />

@@ -2,8 +2,8 @@ import ballerinax/mysql.driver as _;
 import ballerinax/mysql;
 
 // MySQL Database configuration
-configurable string dbUser = "root";
-configurable string dbPassword = "Akindu/19275";
+configurable string[] dbUsers = ["root", "root2", "root3", "root4", "root5"];
+configurable string[] dbPasswords = ["root", "root2", "root3", "root4", "root5"];
 configurable string dbHost = "localhost";
 configurable int dbPort = 3306;
 configurable string dbName = "safe_sri_lanka";
@@ -17,8 +17,8 @@ function init() {
     foreach int i in 0 ..< poolSize {
         mysql:Client|error dbClient = new (
             host = dbHost,
-            user = dbUser,
-            password = dbPassword,
+            user = dbUsers[i],
+            password = dbPasswords[i],
             database = dbName,
             port = dbPort
         );

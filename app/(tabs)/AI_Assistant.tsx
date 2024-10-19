@@ -4,11 +4,11 @@ import { AIService } from '../../services/AIService';
 
 // Custom agent icons using Emojis
 const agentIcons = {
-  'emergency services': '🚨',
-  'legal services': '⚖️',
-  'mental health services': '🧠',
-  'self-defense services': '🥋',
-  'general services': '🔧',
+  'Emergency Assistant': '🚨',
+  'Legal Assistant': '⚖',
+  'Mental Health Assistant': '🧠',
+  'Self-defense Assistant': '🥋',
+  'General Assistant': '🤖',
 };
 
 export default function AI_AssistantScreen() {
@@ -41,7 +41,7 @@ export default function AI_AssistantScreen() {
           <View key={index} style={chat.role === 'user' ? styles.userMessage : styles.assistantMessage}>
             {chat.agent && (
               <Text style={styles.agentText}>
-                {agentIcons[chat.agent.toLowerCase() as keyof typeof agentIcons] || '💬'} {chat.agent}
+                {agentIcons[chat.agent as keyof typeof agentIcons] || '💬'} {chat.agent}
               </Text>
             )}
             <Text style={styles.messageText}>{chat.content}</Text>

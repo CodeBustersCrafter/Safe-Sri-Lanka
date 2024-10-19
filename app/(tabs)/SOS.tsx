@@ -19,6 +19,12 @@ export default function SOSScreen() {
   const [uncomfortableDescription, setUncomfortableDescription] = useState('');
   const [showUncomfortableInput, setShowUncomfortableInput] = useState(false);
 
+  const getLocationName = async (lat: number, lon: number) => {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    const data = await response.json();
+    return data.display_name;
+  };
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -73,12 +79,14 @@ export default function SOSScreen() {
       try {
         const userProfile = await fetchUserProfile(userId);
         const userName = userProfile.name;
+        const locationName = await getLocationName(location.coords.latitude, location.coords.longitude);
+        console.log("Location Name:", locationName.toString().split(',')[1]);
         const response = await sendSOSSignal(
           userId,
           location.coords.latitude,
           location.coords.longitude,
           userName,
-          `${location.coords.latitude},${location.coords.longitude}`
+          locationName.toString().split(',')[1]
         );
         if (response.status === 'success') {
           setIsEmergencyActive(true);

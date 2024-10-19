@@ -11,15 +11,14 @@ import safe_srilanka.traceController as traceController;
 import safe_srilanka.utilController as utilController;
 import safe_srilanka.relationshipController as relationshipController;
 
-// Define the port for the HTTP listener
-const int SOS_PORT = 8083;
-const int UNCOMFORTABLE_PORT = 8082;
-const int AI_CHAT_PORT = 8084;
-const int PROFILE_PORT = 8087;
-const int TRACE_PORT = 8088;
-const int DANGER_ZONE_PORT = 8089;
-const int IMAGES_PORT = 8091;
-const int RELATIONSHIP_PORT = 8080;
+const int SOS_PORT = 9000;
+const int UNCOMFORTABLE_PORT = 9001;
+const int AI_CHAT_PORT = 9002;
+const int PROFILE_PORT = 9003;
+const int TRACE_PORT = 9004;
+const int DANGER_ZONE_PORT = 9005;
+const int IMAGES_PORT = 9006;
+const int RELATIONSHIP_PORT = 9007;
 // Use environment variable for backend IP
 string backendIp = os:getEnv("BACKEND_IP");
 

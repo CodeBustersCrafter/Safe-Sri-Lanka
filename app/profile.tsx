@@ -169,7 +169,7 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
-  const renderFriendCard = (friendId: string, friendName: string, friendLocation: string, friendEmail: string) => {
+  const renderFriendCard = (friendId: string, friendName: string, friendLocation: string, friendEmail: string, friendMobile: string, friendWhatsapp: string) => {
     console.log('Rendering friend card for ID:', friendId);
     return (
       <View key={friendId} style={styles.card}>
@@ -183,6 +183,8 @@ export default function ProfileScreen() {
           <Text style={styles.name}>{friendName}</Text>
           <Text style={styles.details}>Location: {friendLocation}</Text>
           <Text style={styles.details}>Email: {friendEmail}</Text>
+          <Text style={styles.details}>Mobile: {friendMobile}</Text>
+          <Text style={styles.details}>WhatsApp: {friendWhatsapp}</Text>
         </View>
         <TouchableOpacity onPress={() => handleDisconnect(friendId)} style={styles.connectButton}>
           <Ionicons name="remove-circle-outline" size={24} color="#4c669f" />
@@ -272,7 +274,7 @@ export default function ProfileScreen() {
       </TouchableOpacity>
       <FriendsCard onPress={handleFriendsPress} />
       {showFriends && renderAddFriendButton()}
-      {showFriends && friends.map((friend) => renderFriendCard(friend.id, friend.name, friend.location, friend.email))}
+      {showFriends && friends.map((friend) => renderFriendCard(friend.id, friend.name, friend.location, friend.email, friend.mobile, friend.whatsapp))}
     </ScrollView>
   );
 }
