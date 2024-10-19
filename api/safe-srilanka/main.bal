@@ -1,26 +1,35 @@
 import ballerina/http;
-import safe_srilanka.controllers as controllers;
-import safe_srilanka.databaseController as databaseController;
 import ballerina/io;
 import ballerina/mime;
-import ballerina/file;
 import ballerina/os;
 import safe_srilanka.dangerZoneController as dangerZoneController;
-import safe_srilanka.friendsController as friendsController;
-// import ballerina/websocket;
 import safe_srilanka.SOSController as sosController;
 import safe_srilanka.SOSUncomfortableController as uncomfortableController;
+import safe_srilanka.aiChatBotController as aiChatBotController;
+import safe_srilanka.fakeCallController as fakeCallController;
+import safe_srilanka.helpServicesController as helpServicesController;
+import safe_srilanka.profileController as profileController;
+import safe_srilanka.traceController as traceController;
+import safe_srilanka.utilController as utilController;
+import safe_srilanka.relationshipController as relationshipController;
 
 // Define the port for the HTTP listener
-const int PORT = 8080;
+const int HELPLINE_PORT = 8080;
 const int SOS_PORT = 8083;
 const int UNCOMFORTABLE_PORT = 8082;
-
+const int AI_CHAT_PORT = 8084;
+const int FAKE_CALL_PORT = 8085;
+const int DATABASE_PORT = 8086;
+const int PROFILE_PORT = 8087;
+const int TRACE_PORT = 8088;
+const int DANGER_ZONE_PORT = 8089;
+const int IMAGES_PORT = 8091;
+const int RELATIONSHIP_PORT = 8092;
 // Use environment variable for backend IP
 string backendIp = os:getEnv("BACKEND_IP");
 
 // Create HTTP listeners
-listener http:Listener apiListener = new(PORT, config = {
+listener http:Listener helplineListener = new(HELPLINE_PORT, config = {
     host: backendIp
 });
 listener http:Listener sosListener = new(SOS_PORT, config = {
@@ -29,22 +38,89 @@ listener http:Listener sosListener = new(SOS_PORT, config = {
 listener http:Listener uncomfortableListener = new(UNCOMFORTABLE_PORT, config = {
     host: backendIp
 });
+listener http:Listener aiChatListener = new(AI_CHAT_PORT, config = {
+    host: backendIp
+});
+listener http:Listener fakeCallListener = new(FAKE_CALL_PORT, config = {
+    host: backendIp
+});
+listener http:Listener databaseListener = new(DATABASE_PORT, config = {
+    host: backendIp
+});
+listener http:Listener profileListener = new(PROFILE_PORT, config = {
+    host: backendIp
+});
+listener http:Listener traceListener = new(TRACE_PORT, config = {
+    host: backendIp
+});
+listener http:Listener dangerZoneListener = new(DANGER_ZONE_PORT, config = {
+    host: backendIp
+});
+listener http:Listener imagesListener = new(IMAGES_PORT, config = {
+    host: backendIp
+});
+listener http:Listener relationshipListener = new(RELATIONSHIP_PORT, config = {
+    host: backendIp
+});
 
-// Start the services
-service /safe_srilanka/helpline on apiListener {
+
+// AI Chat Bot Service
+service /safe_srilanka/ai_assistant on aiChatListener {
+    resource function post chat(http:Request req) returns json|error {
+        io:println("Processing AI chat request");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            string message = check payload.message.ensureType();
+            return aiChatBotController:chatWithAI(message);
+        } else {
+            io:println("Error: Invalid payload for AI chat");
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+//Danger Zone Service
+service /safe_srilanka/database/dangerZone on databaseListener {
+    //Insert danger zone
+    resource function post insert(http:Request req) returns json|error {
+        io:println("Inserting new danger zone");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            return dangerZoneController:insertDangerZone(payload);
+        } else {
+            io:println("Error: Invalid payload for inserting danger zone");
+            return { "error": "Invalid payload" };
+        }
+    }
+
+    //Get nearby danger zones
+    resource function get nearby(http:Request req) returns json|error {
+        io:println("Fetching nearby danger zones");
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            return dangerZoneController:getNearbyDangerZones(payload);
+        } else {
+            io:println("Error: Invalid payload for fetching nearby danger zones");
+            return { "error": "Invalid payload" };
+        }
+    }
+}
+
+// helpline services
+service /safe_srilanka/helpline on helplineListener {
     resource function get helpline() returns json {
         io:println("Fetching helpline numbers");
-        return controllers:getHelplineNumbers();
+        return helpServicesController:getHelplineNumbers();
     }
 };
 
-// Mount the FakeCall service
-service /safe_srilanka/fakecall on apiListener {
+// FakeCall service
+service /safe_srilanka/fakecall on fakeCallListener {
     resource function post initiate(http:Request req) returns json|error {
         io:println("Initiating fake call");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            return controllers:initiateFakeCall(payload);
+            return fakeCallController:initiateFakeCall(payload);
         } else {
             io:println("Error: Invalid payload for fake call initiation");
             return { "error": "Invalid payload" };
@@ -53,24 +129,19 @@ service /safe_srilanka/fakecall on apiListener {
 
     resource function post stop() returns json|error {
         io:println("Stopping fake call");
-        return controllers:stopFakeCall();
+        return fakeCallController:stopFakeCall();
     }
-}
 
-
-
-// Mount the Recordings service
-service /safe_srilanka/recordings on apiListener {
     resource function get list() returns json {
         io:println("Listing recordings");
-        return controllers:listRecordings();
+        return fakeCallController:listRecordings();
     }
 
     resource function post add(http:Request req) returns json|error {
         io:println("Adding new recording");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            return controllers:addRecording(payload);
+            return fakeCallController:addRecording(payload);
         } else {
             io:println("Error: Invalid payload for adding recording");
             return { "error": "Invalid payload" };
@@ -78,34 +149,34 @@ service /safe_srilanka/recordings on apiListener {
     }
 }
 
-// Mount the AI Assistant service
-service /safe_srilanka/ai_assistant on apiListener {
-    resource function post chat(http:Request req) returns json|error {
-        io:println("Processing AI chat request");
+
+// Profile Service
+service /safe_srilanka/database/profile on profileListener {
+    resource function post getProfile(http:Request req) returns json|error {
+        io:println("Fetching profile");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            return controllers:aiChat(payload);
+            return profileController:getProfile(payload);
         } else {
-            io:println("Error: Invalid payload for AI chat");
+            io:println("Error: Invalid payload for fetching profile");
             return { "error": "Invalid payload" };
         }
     }
-}
-// Profile Service
-service /safe_srilanka/database/profile on apiListener {
-    resource function get getProfile(http:Request req, string id) returns json|error  {
-        io:println("Fetching profile for ID: " + id);
-        return databaseController:getUserProfile(id);
-    }
     resource function get getProfiles(http:Request req) returns json|error  {
         io:println("Fetching all profiles");
-        return databaseController:getUserProfiles();
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            return profileController:getProfiles(payload);
+        } else {
+            io:println("Error: Invalid payload for fetching profiles");
+            return { "error": "Invalid payload" };
+        }
     }
     resource function post addProfile(http:Request req) returns json|error {
         io:println("Adding new profile");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            return databaseController:addProfile(payload);
+            return profileController:addProfile(payload);
         } else {
             io:println("Error: Invalid payload for adding profile");
             return { "error": "Invalid payload" };
@@ -115,18 +186,10 @@ service /safe_srilanka/database/profile on apiListener {
         io:println("Uploading image");
         var payload = req.getBodyParts();
         if (payload is mime:Entity[]) {
-            foreach var part in payload {
-                if (part.getContentDisposition().name == "image") {
-                    byte[] imageBytes = check part.getByteArray();
-                    string base64Image = imageBytes.toBase64();
-                    return controllers:uploadImage(base64Image);
-                }
-            }
-            io:println("Error: No profile image found in the payload");
-            return { "error": "No profile image found" };
+            return profileController:uploadImage(payload);
         } else {
             io:println("Error: Invalid payload for uploading image");
-            return { "error": "Invalid payload" };
+            return { "error": "Invalid payload", "details": "Expected mime:Entity[] for image upload" };
         }
     }
 
@@ -134,99 +197,47 @@ service /safe_srilanka/database/profile on apiListener {
         io:println("Updating profile");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int id = check int:fromString((check payload.id).toString());
-            return databaseController:updateProfile(id, payload);
+            return profileController:updateProfile(payload);
         } else {
             io:println("Error: Invalid payload for profile update");
             return { "error": "Invalid payload" };
         }
     }
-
-    resource function delete remove(http:Request req, int id) returns json|error {
-        io:println("Deleting profile with ID: " + id.toString());
-        return databaseController:deleteProfile(id);
-    }
 }
 
 
 // Insert trace
-service /safe_srilanka/database/trace on apiListener {
+service /safe_srilanka/database/trace on traceListener {
     resource function post insert(http:Request req) returns json|error {
         io:println("Inserting new trace");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int id = check int:fromString((check payload.id).toString());
-            string location = check payload.location.ensureType();
-            return databaseController:insertTrace(id, location);
+            return traceController:insertTrace(payload);
         } else {
             io:println("Error: Invalid payload for inserting trace");
             return { "error": "Invalid payload" };
         }
     }
-}
-
-// Insert danger zone
-service /safe_srilanka/database/dangerZone on apiListener {
-    resource function post insert(http:Request req) returns json|error {
-        io:println("Inserting new danger zone");
-        var payload = req.getJsonPayload();
-        if (payload is json) {
-            decimal lat = check decimal:fromString((check payload.lat).toString());
-            decimal lon = check decimal:fromString((check payload.lon).toString());
-            string description = check payload.description.ensureType();
-            return databaseController:insertDangerZone(lat, lon, description);
-        } else {
-            io:println("Error: Invalid payload for inserting danger zone");
-            return { "error": "Invalid payload" };
-        }
-    }
-
-    resource function get nearby(decimal lat, decimal lon, decimal radius = 1000) returns json|error {
-        io:println("Fetching nearby danger zones");
-        return dangerZoneController:getNearbyDangerZones(lat, lon, radius);
-    }
-}
-
-// Insert current location
-service /safe_srilanka/database/currentLocation on apiListener {
-    resource function post insert(http:Request req) returns json|error {
+    resource function post insertCurrentLocation(http:Request req) returns json|error {
         io:println("Inserting current location");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int id = check int:fromString((check payload.id).toString());
-            decimal lat = check decimal:fromString((check payload.lat).toString());
-            decimal lon = check decimal:fromString((check payload.lon).toString());
-            return databaseController:insertCurrentLocation(id, lat, lon);
+            return traceController:insertCurrentLocation(payload);
         } else {
             io:println("Error: Invalid payload for inserting current location");
             return { "error": "Invalid payload" };
         }
     }
-
-    resource function put update(http:Request req) returns json|error {
-        io:println("Updating current location");
-        var payload = req.getJsonPayload();
-        if (payload is json) {
-            int id = check int:fromString((check payload.id).toString());
-            decimal lat = check decimal:fromString((check payload.lat).toString());
-            decimal lon = check decimal:fromString((check payload.lon).toString());
-            return databaseController:updateCurrentLocation(id, lat, lon);
-        } else {
-            io:println("Error: Invalid payload for updating current location");
-            return { "error": "Invalid payload" };
-        }
-    }
 }
 
+
 // Insert relationship
-service /safe_srilanka/database/relationship on apiListener {
+service /safe_srilanka/database/relationship on relationshipListener {
     resource function post insert(http:Request req) returns json|error {
         io:println("Inserting new relationship");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int user1 = check int:fromString((check payload.user1).toString());
-            int user2 = check int:fromString((check payload.user2).toString());
-            return databaseController:insertRelationship(user1, user2);
+            return relationshipController:insertRelationship(payload);
         } else {
             io:println("Error: Invalid payload for inserting relationship");
             return { "error": "Invalid payload" };
@@ -238,9 +249,7 @@ service /safe_srilanka/database/relationship on apiListener {
         var payload = req.getJsonPayload();
         io:println(payload);
         if (payload is json) {
-            int user1 = check int:fromString((check payload.user1).toString());
-            int user2 = check int:fromString((check payload.user2).toString());
-            return databaseController:deleteRelationship(user1, user2);
+            return relationshipController:deleteRelationship(payload);
         } else {
             io:println("Error: Invalid payload for deleting relationship");
             return { "error": "Invalid payload for deleting relationship" };
@@ -248,59 +257,21 @@ service /safe_srilanka/database/relationship on apiListener {
     }
 
     // Add this new service
-    resource function get nearby(int userId, decimal lat, decimal lon, decimal radius = 5) returns json|error {
+    resource function get nearby(http:Request req) returns json|error {
         io:println("Fetching nearby friends");
-        return friendsController:getNearbyFriends(userId, lat, lon, radius);
+        var payload = req.getJsonPayload();
+        if (payload is json) {
+            return relationshipController:getNearbyFriends(payload);
+        } else {
+            io:println("Error: Invalid payload for fetching nearby friends");
+            return { "error": "Invalid payload" };
+        }
     }
     resource function get getRelationship(http:Request req, int id) returns json|error {
         io:println("Fetching relationship for ID: " + id.toString());
-        return databaseController:getRelationship(id);
+        return relationshipController:getRelationship(id);
     }
 }
-
-// Serve image files
-service /safe_srilanka/images on apiListener {
-    resource function get [string filename](http:Request req) returns error|http:Response {
-        string filePath = "C:\\Users\\SAHAN\\DarkShadow\\Competitions\\ballerina\\Safe-Sri-Lanka\\api\\safe-srilanka\\images\\"+filename;
-        http:Response response = new;
-
-        if (check file:test(filePath, file:EXISTS)) {
-            byte[] fileContent = check io:fileReadBytes(filePath);
-            response.setPayload(fileContent);
-            response.setHeader("Content-Type", "image/jpeg");
-        } else {
-            response.statusCode = 404;
-            response.setTextPayload("Image not found");
-        }
-
-        return response;
-    }
-}
-
-// WebSocket service
-// service /safe_srilanka/ws on new websocket:Listener(9090) {
-//     resource function get .(@http:Header {name: "sec-websocket-protocol"} string subProtocol) returns websocket:Service|websocket:Error {
-//         return new SOSWebSocketService();
-//     }
-// }
-
-// service class SOSWebSocketService {
-//     *websocket:Service;
-
-//     remote function onOpen(websocket:Caller caller) returns error? {
-//         sosController:connections[caller.getConnectionId()] = caller;
-//         io:println("New client connected: " + caller.getConnectionId());
-//     }
-
-//     remote function onClose(websocket:Caller caller) returns error? {
-//         _ = sosController:connections.remove(caller.getConnectionId());
-//         io:println("Client disconnected: " + caller.getConnectionId());
-//     }
-
-//     remote function onMessage(websocket:Caller caller, json data) returns error? {
-//         // Handle incoming messages if needed
-//     }
-// }
 
 // SOS HTTP service
 service /safe_srilanka/sos on sosListener {
@@ -308,10 +279,7 @@ service /safe_srilanka/sos on sosListener {
         io:println("Sending SOS signal");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int senderId = check int:fromString((check payload.senderId).toString());
-            float lat = check float:fromString((check payload.lat).toString());
-            float lon = check float:fromString((check payload.lon).toString());
-            return sosController:sendSOSSignal(senderId, lat, lon);
+            return sosController:sendSOSSignal(payload);
         } else {
             return { "status": "error", "message": "Invalid payload" };
         }
@@ -319,22 +287,19 @@ service /safe_srilanka/sos on sosListener {
 
     resource function get details/[int sosId]() returns json|error {
         io:println("Fetching SOS details for ID: " + sosId.toString());
-        return sosController:getSOSDetails(sosId);
+        return sosController:getSOSDetails({ "sosId": sosId });
     }
 
-    resource function get nearby(float lat, float lon, float radius = 5) returns json|error {
+    resource function get nearby(decimal lat, decimal lon, decimal radius = 5) returns json|error {
         io:println("Fetching nearby SOS signals");
-        return sosController:getNearbySOSSignals(lat, lon, radius);
+        return sosController:getNearbySOSSignals({ "lat": lat, "lon": lon, "radius": radius });
     }
 
     resource function post generateOTP(http:Request req) returns json|error {
         io:println("Generating OTP for SOS deactivation");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int sosId = check int:fromString((check payload.sosId).toString());
-            string otp = check sosController:generateOTP(sosId);
-            string recipientEmail = check payload.email.ensureType();
-            return sosController:sendOTPEmail(recipientEmail, otp);
+            return sosController:generateOTP(payload);
         } else {
             return { "status": "error", "message": "Invalid payload" };
         }
@@ -344,9 +309,7 @@ service /safe_srilanka/sos on sosListener {
         io:println("Deactivating SOS signal");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int sosId = check int:fromString((check payload.sosId).toString());
-            string otp = check payload.otp.ensureType();
-            return sosController:verifyOTPAndDeleteSOSSignal(sosId, otp);
+            return sosController:verifyOTPAndDeleteSOSSignal(payload);
         } else {
             return { "status": "error", "message": "Invalid payload" };
         }
@@ -359,11 +322,7 @@ service /safe_srilanka/uncomfortable on uncomfortableListener {
         io:println("Sending Uncomfortable signal");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int senderId = check int:fromString((check payload.senderId).toString());
-            float lat = check float:fromString((check payload.lat).toString());
-            float lon = check float:fromString((check payload.lon).toString());
-            string description = check payload.description.ensureType();
-            return uncomfortableController:sendUncomfortableSignal(senderId, lat, lon, description);
+            return uncomfortableController:sendUncomfortableSignal(payload);
         } else {
             return { "status": "error", "message": "Invalid payload" };
         }
@@ -371,61 +330,53 @@ service /safe_srilanka/uncomfortable on uncomfortableListener {
 
     resource function get details/[int uncomfortableId]() returns json|error {
         io:println("Fetching Uncomfortable details for ID: " + uncomfortableId.toString());
-        return uncomfortableController:getUncomfortableDetails(uncomfortableId);
+        return uncomfortableController:getUncomfortableDetails({ "uncomfortableId": uncomfortableId });
     }
 
-    resource function get nearby(float lat, float lon, float radius = 5) returns json|error {
+    resource function get nearby(decimal lat, decimal lon, decimal radius = 5) returns json|error {
         io:println("Fetching nearby Uncomfortable signals");
-        return uncomfortableController:getNearbyUncomfortableSignals(lat, lon, radius);
+        return uncomfortableController:getNearbyUncomfortableSignals({ "lat": lat, "lon": lon, "radius": radius });
     }
 
     resource function post deactivate(http:Request req) returns json|error {
         io:println("Deactivating Uncomfortable signal");
         var payload = req.getJsonPayload();
         if (payload is json) {
-            int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
-            return uncomfortableController:deactivateUncomfortableSignal(uncomfortableId);
+            return uncomfortableController:deactivateUncomfortableSignal(payload);
         } else {
             return { "status": "error", "message": "Invalid payload" };
         }
     }
-
-    // resource function post generateOTP(http:Request req) returns json|error {
-    //     io:println("Generating OTP for Uncomfortable deactivation");
-    //     var payload = req.getJsonPayload();
-    //     if (payload is json) {
-    //         int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
-    //         string otp = check uncomfortableController:generateOTP(uncomfortableId);
-    //         string recipientEmail = check payload.email.ensureType();
-    //         return uncomfortableController:sendOTPEmail(recipientEmail, otp);
-    //     } else {
-    //         return { "status": "error", "message": "Invalid payload" };
-    //     }
-    // }
-
-    // resource function post deactivate(http:Request req) returns json|error {
-    //     io:println("Deactivating Uncomfortable signal");
-    //     var payload = req.getJsonPayload();
-    //     if (payload is json) {
-    //         int uncomfortableId = check int:fromString((check payload.uncomfortableId).toString());
-    //         string otp = check payload.otp.ensureType();
-    //         return uncomfortableController:verifyOTPAndDeleteUncomfortableSignal(uncomfortableId, otp);
-    //     } else {
-    //         return { "status": "error", "message": "Invalid payload" };
-    //     }
-    // }
 }
 
-
+// Util Service
+service /safe_srilanka/util on imagesListener {
+    resource function get image(http:Request req, string filename) returns json|error {
+        json payload = { "filename": filename };
+        return utilController:serveImage(payload);
+    }
+}
 
 public function main() returns error? {
-    io:println("Starting Safe Sri Lanka API server on port " + PORT.toString());
+    io:println("Starting Safe Sri Lanka API server on following ports:");
     // Start the HTTP listeners
-    check apiListener.'start();
+    check helplineListener.'start();
     check sosListener.'start();
     check uncomfortableListener.'start();
+    check aiChatListener.'start();
+    check fakeCallListener.'start();
+    check databaseListener.'start();
+    check profileListener.'start();
+    check traceListener.'start();
+    check dangerZoneListener.'start();
     io:println("Safe Sri Lanka API server started successfully on ports:");
-    io:println("  - Main API: " + PORT.toString());
+    io:println("  - Main API: " + HELPLINE_PORT.toString());
     io:println("  - SOS: " + SOS_PORT.toString());
     io:println("  - Uncomfortable: " + UNCOMFORTABLE_PORT.toString());
+    io:println("  - AI Chat: " + AI_CHAT_PORT.toString());
+    io:println("  - Fake Call: " + FAKE_CALL_PORT.toString());
+    io:println("  - Database: " + DATABASE_PORT.toString());
+    io:println("  - Profile: " + PROFILE_PORT.toString());
+    io:println("  - Trace: " + TRACE_PORT.toString());
+    io:println("  - Danger Zone: " + DANGER_ZONE_PORT.toString());
 }
