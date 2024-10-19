@@ -399,13 +399,20 @@ modules = [
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SMSController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSModel"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSUncomfortableController"},
-	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBot"},
-	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.controllers"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.SOSUncomfortableModel"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.aiChatBotController"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.dangerZoneController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.dangerZoneModel"},
 	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.database"},
-	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.databaseController"},
-	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.friendsController"},
-	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.models"}
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.models"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.profileController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.profileModel"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.relationshipController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.relationshipModel"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.traceController"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.traceModel"},
+	{org = "sahan", packageName = "safe_srilanka", moduleName = "safe_srilanka.utilController"}
 ]
 
