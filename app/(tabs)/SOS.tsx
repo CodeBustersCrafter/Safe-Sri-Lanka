@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Alert, TextInput } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BACKEND_URL } from '../const';
 import { LocationObject } from 'expo-location';
-import { generateOTP, deactivateSOS, sendSOSSignal } from '../apiCalls/sosApi';
-import { deactivateUncomfortableSignal, sendUncomfortableSignal } from '../apiCalls/uncomfortableApi';
+import { generateOTP, deactivateSOS, sendSOSSignal } from '../../services/sosApi';
+import { deactivateUncomfortableSignal, sendUncomfortableSignal } from '../../services/uncomfortableApi';
+import { fetchUserProfile } from '../../services/userService';
 const { height } = Dimensions.get('window');
 
 export default function SOSScreen() {
@@ -40,8 +40,8 @@ export default function SOSScreen() {
         Alert.alert('Error', 'User ID not found');
         return;
       }
-      const userProfile = await fetch(`${BACKEND_URL}/database/profile/getProfile?id=${uid}`).then(res => res.json());
-      const userEmail = userProfile.value.email;
+      const userProfile = await fetchUserProfile(uid);
+      const userEmail = userProfile.email;
       if (!userEmail) {
         Alert.alert('Error', 'User email not found');
         return;
@@ -71,7 +71,7 @@ export default function SOSScreen() {
         return;
       }
       try {
-        const response = await sendSOSSignal(Number(userId),location.coords.latitude, location.coords.longitude);
+        const response = await sendSOSSignal(userId,location.coords.latitude, location.coords.longitude);
         if (response.status === 'success') {
           setIsEmergencyActive(true);
           setSosId(response.sosId);

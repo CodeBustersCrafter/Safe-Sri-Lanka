@@ -23,6 +23,8 @@ public function uploadImage(string base64Image) returns json|error {
     }
 
     // Return the filename
+    io:println("Image uploaded successfully");
+    io:println("File name: " + filename);
     return {
         "status": "success",
         "message": "Image uploaded successfully",
@@ -34,10 +36,23 @@ public function uploadImage(string base64Image) returns json|error {
 public function serveImage(json payload) returns json|error {
     string filename = check payload.filename.ensureType();
     string filePath = "./images/" + filename;
+    io:println("File path: " + filePath);
 
     if (check file:test(filePath, file:EXISTS)) {
+        
         byte[] fileContent = check io:fileReadBytes(filePath);
         string base64Image = array:toBase64(fileContent);
+        
+        // Validate the base64 image data
+        if (base64Image == "") {
+            io:println("Error: Invalid image data");
+            return {
+                "status": "error",
+                "message": "Invalid image data"
+            };
+        }
+        
+        io:println("Image served successfully");
         return {
             "status": "success",
             "message": "Image served successfully",
@@ -45,6 +60,7 @@ public function serveImage(json payload) returns json|error {
             "contentType": "image/jpeg"
         };
     } else {
+        io:println("Image not found");
         return {
             "status": "error",
             "message": "Image not found"

@@ -3,9 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { LocationObjectCoords } from 'expo-location';
-import { BACKEND_URL } from './const';
 import MapView, { Marker } from 'react-native-maps';
 import Modal from 'react-native-modal';
+import { addDangerZone } from '../services/dangerZoneApi';
 
 const AddDangerZone = () => {
   const [description, setDescription] = useState('');
@@ -41,19 +41,9 @@ const AddDangerZone = () => {
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/database/dangerZone/insert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          lat: location.latitude,
-          lon: location.longitude,
-          description: description,
-        }),
-      });
-
-      if (response.ok) {
+      const response = await addDangerZone(location.latitude, location.longitude, description);
+      console.log("Response:", response);
+      if (response.status === "success") {
         alert('Danger zone added successfully!');
         router.back();
       } else {

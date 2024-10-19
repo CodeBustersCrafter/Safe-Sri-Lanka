@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { BACKEND_URL } from '../app/const';
+import { uploadImage } from '../apiControllers/utileController';
 
 interface ProfilePictureProps {
   imageUri: string | null;
@@ -28,55 +28,26 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({ imageUri, setImageUri }
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
-      // Send image to server and save it
       try {
-        const formData = new FormData();
-        formData.append('image', {
-          uri: result.assets[0].uri,
-          type: 'image/jpeg',
-          name: 'profile_picture.jpg',
-        } as any);
-
-        const response = await fetch(`${BACKEND_URL}/database/profile/uploadImage`, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to upload image');
-        }
-
-        const data = await response.json();
-        if (data.status === 'success') {
-          // Save the returned image filename
-          const imageUrl = data.filename;
-          setImageUri(imageUrl);
-        } else {
-          throw new Error(data.message || 'Failed to save image on server');
-        }
+        const filename = await uploadImage(result.assets[0].uri);
+        setImageUri(filename);
+        console.log('Image uploaded successfully:', filename);
       } catch (error) {
         console.error('Error uploading image:', error);
         Alert.alert('Error', 'Failed to upload image. Please try again.');
       }
     }
   };
-  const getBackendIp = () => {
-    const url = BACKEND_URL.split('/')[2];
-    console.log(url);
-    return url;
-  };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={pickImage}> 
         {imageUri ? (
-          <Image 
-            source={{ uri: `http://${getBackendIp()}/safe_srilanka/images/${imageUri}` }} 
-            style={styles.image} 
+          <Image
+            source={imageUri === "" || imageUri === null 
+              ? require('../assets/images/default-profile-image.png')
+              : { uri: `data:image/jpeg;base64,${imageUri}` }}
+            style={styles.image}
           />
         ) : (
           <View style={styles.placeholder}>

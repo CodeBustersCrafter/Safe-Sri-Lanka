@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { AIService } from '../../services/AIService';
 
 // Custom agent icons using Emojis
 const agentIcons = {
@@ -23,15 +24,7 @@ export default function AI_AssistantScreen() {
     setMessage('');
 
     try {
-      const response = await fetch('http://192.168.56.1:8080/safe_srilanka/ai_assistant/chat', { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-      });
-
-      const data = await response.json();
+      const data = await AIService.sendMessage(message);
       setChatHistory(prev => [...prev, { role: 'assistant', content: data.response, agent: data.agent }]);
     } catch (error) {
       console.error('Error:', error);

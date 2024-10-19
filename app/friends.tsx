@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BACKEND_URL } from './const';
-
+import { addFriend } from '../services/friendsApi';
+import { getAllUserProfiles} from '../services/userService';
+import { fetchImage } from '../apiControllers/utileController';
 interface UserProfile {
   id: number;
   name: string;
@@ -17,7 +18,7 @@ interface UserProfile {
 export default function FriendsScreen() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
+  const [fetchedImages, setFetchedImages] = useState<Map<string, string>>(new Map());
   useEffect(() => {
     fetchProfiles();
     getCurrentUserId();
@@ -28,16 +29,21 @@ export default function FriendsScreen() {
     setCurrentUserId(userId);
     console.log(userId);
   };
-
+  
   const fetchProfiles = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/database/profile/getProfiles`);
-      const data = await response.json();
-      if (Array.isArray(data)) {
+      const data = await getAllUserProfiles();
+      if (data && Array.isArray(data)) {
         // Filter out the current user's profile
-        const filteredData = data.filter((profile: UserProfile) => profile.id.toString() !== currentUserId);
-        console.log(filteredData); 
-        setProfiles(filteredData);
+        const filteredData = data.filter((profile) => profile.email.toString() !== currentUserId);
+        console.log(filteredData);
+        setProfiles(filteredData as UserProfile[]);
+        const imageMap = new Map<string, string>();
+        await Promise.all(filteredData.map(async (profile) => {
+          const image = await fetchImage(profile.profileImage);
+          imageMap.set(profile.id.toString(), image);
+        }));
+        setFetchedImages(imageMap);
       } else {
         console.error('Unexpected data format:', data);
         Alert.alert('Error', 'Failed to load user profiles');
@@ -63,18 +69,7 @@ export default function FriendsScreen() {
         text: 'Connect',
         onPress: async () => {
           try {
-            const response = await fetch(`${BACKEND_URL}/database/relationship/insert`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                user1: currentUserId,
-                user2: userId.toString(),
-              }),
-            });
-
-            const result = await response.json();
+            const result = await addFriend(parseInt(currentUserId), userId);
             if (result.status === 'success') {
               Alert.alert('Success', 'Connection request sent successfully');
             } else {
@@ -92,7 +87,9 @@ export default function FriendsScreen() {
   const renderUserCard = (user: UserProfile) => (
     <View key={user.id} style={styles.card}>
       <Image
-        source={{ uri: `${BACKEND_URL}/images/${user.profileImage}` }}
+        source={fetchedImages.get(user.id.toString()) === "" || fetchedImages.get(user.id.toString()) === null 
+          ? require('../assets/images/default-profile-image.png')
+          : { uri: `data:image/jpeg;base64,${fetchedImages.get(user.id.toString())}` }}
         style={styles.profileImage}
       />
       <View style={styles.userInfo}>

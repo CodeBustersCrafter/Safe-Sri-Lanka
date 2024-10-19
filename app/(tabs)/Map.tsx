@@ -5,10 +5,10 @@ import * as Location from 'expo-location';
 import { startLocationTracking, getCurrentLocation } from '../../services/LocationService';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getNearbyDangerZones } from '../apiCalls/dangerZoneApi';
-import { getNearbyFriends } from '../apiCalls/friendsApi';
-import { getNearbySOSSignals } from '../apiCalls/sosApi';
-import { getNearbyUncomfortableSignals } from '../apiCalls/uncomfortableApi'; // Add this import
+import { getNearbyDangerZones } from '../../services/dangerZoneApi';
+import { getNearbyFriends } from '../../services/friendsApi';
+import { getNearbySOSSignals } from '../../services/sosApi';
+import { getNearbyUncomfortableSignals } from '../../services/uncomfortableApi'; // Add this import
 
 const { width, height } = Dimensions.get('window');
 
@@ -99,6 +99,7 @@ export default function MapScreen() {
   const fetchDangerZones = async (lat: number, lon: number) => {
     try {
       const zones = await getNearbyDangerZones(lat, lon);
+      console.log('Fetched danger zones:', zones);
       setDangerZones(zones);
     } catch (error) {
       console.error('Failed to fetch danger zones:', error);
@@ -139,15 +140,7 @@ export default function MapScreen() {
     setLocation(newLocation);
     console.log('Fetching SOS and Uncomfortable signals');
     fetchSOSSignals(newLocation.coords.latitude, newLocation.coords.longitude);
-    fetchUncomfortableSignals(newLocation.coords.latitude, newLocation.coords.longitude);
-    //fetchCity(newLocation);
-    //fetchDangerZones(newLocation.coords.latitude, newLocation.coords.longitude);
-    // AsyncStorage.getItem('uid').then(userId => {
-    //   if (userId) {
-    //     fetchFriends(parseInt(userId), newLocation.coords.latitude, newLocation.coords.longitude);
-    //   }
-    // });
-    
+    fetchUncomfortableSignals(newLocation.coords.latitude, newLocation.coords.longitude); 
   
   }, [isTracking]);
 
@@ -166,7 +159,7 @@ export default function MapScreen() {
         trackingIntervalRef.current = setInterval(() => {
           console.log("Tracking");
           startLocationTracking(updateLocation);
-        }, 10000*6); // for 10 seconds
+        }, 10000); // for 10 seconds
       }
       return !prevIsTracking;
     });
@@ -272,7 +265,7 @@ export default function MapScreen() {
               />
             </Marker>
           ))}
-          {isTracking && sosSignals.map((signal: SOSSignal) => (
+          {isTracking && sosSignals && Array.isArray(sosSignals) && sosSignals.map((signal: SOSSignal) => (
             <Marker
               key={`sos-${signal.id}`}
               coordinate={{
@@ -287,7 +280,7 @@ export default function MapScreen() {
               </View>
             </Marker>
           ))}
-          {isTracking && uncomfortableSignals.map((signal: UncomfortableSignal) => (
+          {isTracking && uncomfortableSignals && Array.isArray(uncomfortableSignals) && uncomfortableSignals.map((signal: UncomfortableSignal) => (
             <Marker
               key={`uncomfortable-${signal.id}`}
               coordinate={{

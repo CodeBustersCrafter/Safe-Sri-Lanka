@@ -23,14 +23,14 @@ The SOS Model is a crucial component of the Safe Sri Lanka application, designed
 - **Detailed Signal Information**: Store and retrieve comprehensive emergency details
 - **Signal Lifecycle Management**: Support activation, updates, and resolution of SOS alerts
 
-### 📊 Core Functions
+### ���� Core Functions
 
 The `SOSModel.bal` file implements the following main functions:
 
-1. `insertSOSSignal(int senderId, decimal lat, decimal lon, string description) returns sql:ExecutionResult|sql:Error`
+1. `insertSOSSignal(int senderId, decimal lat, decimal lon) returns sql:ExecutionResult|error`
 2. `getRecipientsForSOS(int senderId, decimal lat, decimal lon) returns stream<record {}, error?>`
 3. `getSOSDetails(int sosId) returns record {}|error?`
-4. `updateSOSStatus(int sosId, string status) returns sql:ExecutionResult|sql:Error`
+4. `updateSOSOTP(int sosId, string otp) returns sql:ExecutionResult|error`
 
 ### 🔧 Implementation Details
 

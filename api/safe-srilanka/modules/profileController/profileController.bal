@@ -10,6 +10,7 @@ public function getProfile(json payload) returns json|error {
     io:println("Fetching profile for ID: " + id);
     stream<record {}, error?> profileStream = profileModel:getUserProfile(id);
     record {}|error? result = profileStream.next();
+    io:println(result);
     if (result is record {}) {
         return { "status": "success", "profile": result.toJson() };
     } else {

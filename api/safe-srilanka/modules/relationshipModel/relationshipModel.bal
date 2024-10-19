@@ -25,7 +25,16 @@ public function deleteRelationship(int user1, int user2) returns sql:ExecutionRe
 }
 
 public function getNearbyFriends(int userId, decimal lat, decimal lon, decimal radius) returns stream<record {}, error?> {
-    sql:ParameterizedQuery query = `SELECT * FROM relationship INNER JOIN profile ON relationship.user2 = profile.id WHERE user1 = ${userId} AND ST_Distance_Sphere(POINT(${lon}, ${lat}), profile.location) <= ${radius}`;
+    sql:ParameterizedQuery query = `
+        SELECT r.user2 as id, p.name, p.mobile, p.whatsapp, p.email, p.profileImage, cl.lat, cl.lon,
+               (6371 * acos(cos(radians(${lat})) * cos(radians(cl.lat)) * cos(radians(cl.lon) - radians(${lon})) + sin(radians(${lat})) * sin(radians(cl.lat)))) AS distance
+        FROM relationship r
+        INNER JOIN profile p ON r.user2 = p.id
+        INNER JOIN current_location cl ON r.user2 = cl.id
+        WHERE r.user1 = ${userId}
+        HAVING distance < ${radius}
+        ORDER BY distance
+    `;
     stream<record {}, error?> resultStream = dbClient->query(query);
     return resultStream;
 }

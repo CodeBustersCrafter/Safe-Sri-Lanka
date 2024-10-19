@@ -8,7 +8,8 @@ import EditableField from '../components/EditableField';
 import FriendsCard from '../components/FriendsCard';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchUserProfile, saveUserProfile, updateUserProfile } from '../services/userService'
-import { BACKEND_URL } from './const';
+import { getFriendRelationships, removeFriend } from '../services/friendsApi';
+import { uploadImage, fetchImage } from '../apiControllers/utileController';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -21,12 +22,17 @@ export default function ProfileScreen() {
   const [uid, setUid] = useState<string | null>(null);
   const [friends, setFriends] = useState<UserProfile[]>([]);
   const [showFriends, setShowFriends] = useState(false);
+  const [fetchedImage, setFetchedImage] = useState<string | null>(null);
+  const [fetchedImages, setFetchedImages] = useState<Map<string, string>>(new Map());
 
   interface UserProfile {
     id: string;
     name: string;
     location: string;
     email: string;
+    whatsapp: string;
+    mobile: string;
+    profileImage: string;
   }
 
   useEffect(() => {
@@ -35,13 +41,15 @@ export default function ProfileScreen() {
       setUid(storedUid);
       if (storedUid) {
         try {
-          const userData = await fetchUserProfile(parseInt(storedUid));
+          const userData = await fetchUserProfile(storedUid);
           setName(userData.name || '');
           setMobile(userData.mobile || '');
           setWhatsapp(userData.whatsapp || '');
           setEmail(userData.email || '');
           setLocation(userData.location || '');
           setImageUri(userData.profileImage || '');
+          const fetchedImageData = await fetchImage(userData.profileImage);
+          setFetchedImage(fetchedImageData);
         } catch (error) {
           console.error('Error fetching user data:', error);
           Alert.alert('Error', 'Failed to load user data');
@@ -68,7 +76,7 @@ export default function ProfileScreen() {
         Alert.alert('Profile Updated', 'Your profile information has been updated.');
       } else {
         const result = await saveUserProfile(profileData);
-        if(result.status === 'success'){
+        if (result.status === 'success') {
           const newUid = result.id;
           if (newUid !== undefined && newUid !== null) {
             await AsyncStorage.setItem('uid', newUid.toString());
@@ -88,13 +96,15 @@ export default function ProfileScreen() {
   const fetchFriends = async () => {
     console.log('Fetching friends for UID:', uid);
     try {
-      const response = await fetch(`${BACKEND_URL}/database/relationship/getRelationship?id=${uid}`);
-      const data = await response.json();
-      console.log('Received friend data:', data);
-      if (data && data.relationships && data.relationships.length > 0) {
-        console.log('Setting friends:', data.relationships);
-        setFriends(data.relationships.map((friend: any) => ({
-          id: friend.user2,
+      if (!uid) {
+        throw new Error('UID is null');
+      }
+      const friendsData = await getFriendRelationships(parseInt(uid));
+      console.log('Received friend data:', friendsData);
+      if (friendsData && friendsData.length > 0) {
+        console.log('Setting friends:', friendsData);
+        setFriends(friendsData.map((friend: UserProfile) => ({
+          id: friend.id,
           name: friend.name,
           whatsapp: friend.whatsapp,
           mobile: friend.mobile,
@@ -102,6 +112,12 @@ export default function ProfileScreen() {
           profileImage: friend.profileImage,
           email: friend.email
         })));
+        const imageMap = new Map<string, string>();
+        await Promise.all(friendsData.map(async (friend: UserProfile) => {
+          const image = await fetchImage(friend.profileImage);
+          imageMap.set(friend.id, image);
+        }));
+        setFetchedImages(imageMap);
       } else {
         console.log('No friends data found in response');
         setFriends([]);
@@ -158,7 +174,9 @@ export default function ProfileScreen() {
     return (
       <View key={friendId} style={styles.card}>
         <Image
-          source={{ uri: `${BACKEND_URL}/images/${friendId}` }}
+          source={fetchedImages.get(friendId) === "" || fetchedImages.get(friendId) === null 
+            ? require('../assets/images/default-profile-image.png')
+            : { uri: `data:image/jpeg;base64,${fetchedImages.get(friendId)}` }}
           style={styles.profileImage}
         />
         <View style={styles.userInfo}>
@@ -187,16 +205,12 @@ export default function ProfileScreen() {
           text: 'Yes',
           onPress: async () => {
             try {
-              const response = await fetch(`${BACKEND_URL}/database/relationship/deleteRelationship`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user1: uid, user2: friendId }),  
-              });
-              const data = await response.json();
-              console.log('Disconnection response:', data);
-              if (data.status === 'success') {
+              if (!uid) {
+                throw new Error('UID is null');
+              }
+              const result = await removeFriend(parseInt(uid), parseInt(friendId));
+              console.log('Disconnection response:', result);
+              if (result === 'success') {
                 setFriends(friends.filter((friend) => friend.id !== friendId));
                 Alert.alert('Friend Removed', 'You are no longer connected to this friend.');
               } else {
@@ -216,7 +230,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <ProfilePicture
-        imageUri={imageUri}
+        imageUri={fetchedImage}
         setImageUri={setImageUri}
       />
       <EditableField

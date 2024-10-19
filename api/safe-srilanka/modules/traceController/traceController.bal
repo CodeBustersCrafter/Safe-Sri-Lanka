@@ -1,5 +1,6 @@
 import safe_srilanka.traceModel;
 import ballerina/sql;
+import ballerina/log;
 
 // Insert trace
 public function insertTrace(json payload) returns json|error {
@@ -18,7 +19,8 @@ public function insertTrace(json payload) returns json|error {
             decimal lat = check decimal:fromString(latStr);
             decimal lon = check decimal:fromString(lonStr);
             json updateResult = updateCurrentLocation(id, lat, lon);
-            return { "status": "success", "message": "Trace inserted successfully", "currentLocation": updateResult };
+            log:printInfo("Trace and current location inserted successfully");
+            return { "status": "success", "message": "Trace and current location inserted successfully", "currentLocation": updateResult };
         }
         return { "status": "error", "message": "Trace inserted successfully. but failed to update current location" };
     } else {

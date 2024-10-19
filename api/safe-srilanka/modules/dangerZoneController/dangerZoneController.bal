@@ -2,7 +2,7 @@ import ballerina/io;
 import ballerina/sql;
 import safe_srilanka.dangerZoneModel as dangerZoneModel;
 import safe_srilanka.models as models;
-
+import ballerina/log;
 public function getNearbyDangerZones(json payload) returns json|error {
     io:println("Fetching nearby danger zones");
     decimal userLat = check decimal:fromString((check payload.lat).toString());
@@ -43,6 +43,7 @@ public function insertDangerZone(json payload) returns json|error {
     if result is sql:ExecutionResult {
         return { "status": "success", "message": "Danger zone inserted successfully" };
     } else {
+        log:printInfo(result.message());
         return { "status": "error", "message": "Failed to insert danger zone: " + result.message() };
     }
 }
