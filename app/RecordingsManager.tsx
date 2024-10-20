@@ -3,12 +3,14 @@ import { View, StyleSheet, FlatList, Text, TouchableOpacity, Alert } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import { setSelectedRecording, getSelectedRecording, defaultRecordings, Recording } from '../services/AudioService';
 import { Audio } from 'expo-av';
+import { useRouter } from 'expo-router';
 
 export default function RecordingsManager() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [selectedRecording, setSelectedRecordingState] = useState<Recording | null>(null);
   const [playingRecordingId, setPlayingRecordingId] = useState<string | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     loadRecordings();
@@ -35,6 +37,7 @@ export default function RecordingsManager() {
       setSelectedRecordingState(recording);
       Alert.alert('Ringtone Selected', `You have selected: ${recording.name}`);
       console.log('Selected recording:', recording);
+      router.back(); // Navigate back to the FakeCall screen
     } catch (error) {
       console.error('Error selecting recording:', error);
       Alert.alert('Error', 'Failed to select the recording. Please try again.');

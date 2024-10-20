@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { Ionicons } from '@expo/vector-icons';
 import { playRecording, stopFakeCall } from '../../services/FakeCallService';
@@ -26,9 +26,19 @@ export default function FakeCallScreen() {
   const router = useRouter();
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    loadSelectedRecording();
+  const loadSelectedRecording = useCallback(async () => {
+    const recording = await getSelectedRecording();
+    setSelectedRecordingState(recording);
+    console.log('Loaded selected recording:', recording);
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadSelectedRecording();
+    }, [loadSelectedRecording])
+  );
+
+  useEffect(() => {
     const subscription = Notifications.addNotificationReceivedListener(handleNotification);
     return () => {
       subscription.remove();
@@ -38,12 +48,6 @@ export default function FakeCallScreen() {
       stopFakeCall();
     };
   }, []);
-
-  const loadSelectedRecording = async () => {
-    const recording = await getSelectedRecording();
-    setSelectedRecordingState(recording);
-    console.log('Loaded selected recording:', recording);
-  };
 
   const handleGetFakeCall = async () => {
     if (selectedRecording) {
@@ -178,7 +182,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   callButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#0cab39',
     paddingVertical: 20,
     paddingHorizontal: 40,
     borderRadius: 50,

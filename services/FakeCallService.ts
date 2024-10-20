@@ -1,12 +1,16 @@
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
 import { Platform, Alert } from 'react-native';
-import { Recording } from './AudioService';
+import { Recording, getSelectedRecording } from './AudioService';
 
 let sound: Audio.Sound | null = null;
 
-export const playRecording = async (recording: Recording) => {
+export const playRecording = async () => {
   try {
+    const recording = await getSelectedRecording();
+    if (!recording) {
+      throw new Error('No recording selected');
+    }
     console.log('Attempting to play recording:', recording);
     if (sound) {
       await sound.unloadAsync();
