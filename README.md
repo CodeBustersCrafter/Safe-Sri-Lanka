@@ -37,8 +37,6 @@ Safe-Sri-Lanka is a comprehensive mobile application specially developed for wom
 
 ## 🗂 Project Structure
 
-## 🗂 Project Structure
-
 - **api/**: Contains the Ballerina backend code.
   - **safe-srilanka/**: Main backend application directory.
     - **modules/**: Contains various modules including database, controllers, etc.
