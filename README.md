@@ -62,6 +62,7 @@ For the application to communicate with the backend properly, you need to update
    - Open `api/safe-srilanka/main.bal`
    - Locate the `const string backendIp` line
    - Change it to your PC's IP address
+
    Example:
    ```
    const string backendIp = "192.168.56.2";
@@ -71,6 +72,7 @@ For the application to communicate with the backend properly, you need to update
    - Open `app/const.tsx`
    - Find the `BASE_URL` constant
    - Update it with your PC's IP address
+   
    Example:
    ```typescript
    const BASE_URL = 'http://192.168.56.2';
