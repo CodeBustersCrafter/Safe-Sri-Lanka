@@ -65,7 +65,7 @@
 #         return None
 
 # # Example usage:
-# api_key = "AIzaSyCrv-hyFaQHFigg2WJ_CEKJ327yi-CdLfU"
+# api_key = os.getenv("Google_API_Key")
 
 # # Latitude and Longitude for the origin (e.g., Colombo, Sri Lanka)
 # origin_lat = 6.9271
