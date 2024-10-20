@@ -105,6 +105,7 @@ Note:
    - Using Expo Go App: Open the Expo Go app and scan the QR code displayed in the terminal.
 
 4. Python Servers (Not Required already deployed in AWS):
+
    All Python servers have been deployed on our AWS server, so you don't need to worry about running them locally. However, if you need to run and test them:
 
    - Request the `.env` file from us by emailing teamcognic.ai@gmail.com
