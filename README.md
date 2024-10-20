@@ -37,16 +37,55 @@ Safe-Sri-Lanka is a comprehensive mobile application specially developed for wom
 
 ## 🗂 Project Structure
 
+## 🗂 Project Structure
+
 - **api/**: Contains the Ballerina backend code.
   - **safe-srilanka/**: Main backend application directory.
     - **modules/**: Contains various modules including database, controllers, etc.
     - **main.bal**: Entry point for the backend application.
+  - **.devcontainer.json**: Configuration for development container.
+  - **.gitignore**: Git ignore file for the API.
+  - **Dependencies.toml**: Dependencies for the Ballerina project.
+
+- **apiControllers/**: Contains TypeScript controllers for API interactions.
+  - **aiChatbotController.ts**: Controller for AI chatbot functionality.
+  - **dangerZoneController.ts**: Controller for danger zone related operations.
+  - **profileController.ts**: Controller for user profile management.
+  - **relationshipController.ts**: Controller for managing user relationships.
+  - **sosController.ts**: Controller for SOS functionality.
+  - **utileController.ts**: Controller for utility functions like image handling.
+
 - **app/**: Contains the React Native frontend components.
+  - **const.tsx**: Constants used throughout the app.
+  - **friends.tsx**: Component for friends functionality.
+  - Other app-specific components and screens.
+
+- **Python_backend/**: Python backend services.
+  - **Chatbots/**: Chatbot implementation.
+    - **main_chatbot.py**: Main script for chatbot functionality.
+  - **Call and sms services/**: Services for calls and SMS.
+    - **call_server.py**: Server for handling calls.
+    - **call.py**: Script for making calls.
+    - **sms.py**: Script for sending SMS.
+  - **Map Services/**: Services related to maps.
+    - **directions.py**: Script for handling directions.
+  - **Vector_databases/**: Vector databases for AI functionalities.
+    - **VectorDBCreator.py**: Script for creating vector databases.
+
+- **services/**: Contains service layer for the application.
+  - **friendsApi.ts**: API service for friends functionality.
+  - **sosApi.ts**: API service for SOS functionality.
+  - **userService.ts**: Service for user-related operations.
+
 - **components/**: Houses reusable React components used in the application.
+
 - **hooks/**: Custom React hooks for various functionalities.
+
 - **assets/**: Stores fonts, images, and other static assets.
-- **package.json**: Lists all the dependencies for the frontend project.
+
 - **db.sql**: SQL file for setting up the database schema.
+
+- **package.json**: Lists all the dependencies for the frontend project.
 
 ## 🗄️ Database Setup
 
