@@ -2,6 +2,20 @@
 
 Safe-Sri-Lanka is a comprehensive mobile application specially developed for women's safety, designed to enhance security for female residents and visitors in Sri Lanka. The app features an SOS button for emergency situations, real-time location tracking, access to helplines, and an AI-powered chatbot for intelligent assistance. With additional features like danger zone alerts and relationship management, Safe-Sri-Lanka aims to provide women with peace of mind and immediate support when needed. This user-friendly interface empowers people to navigate their surroundings with confidence and access help quickly in potentially unsafe situations.
 
+<div align="center">
+  <a href="https://youtu.be/hV0jOnzFcdI?si=VOCYdYhFcp6bbert">
+    <img src="https://github.com/CodeBustersCrafter/iwb350-cognic-ai/blob/main/Tumblain.jpg" alt="Safe-Sri-Lanka Demo" width="600">
+  </a>
+  <br>
+  <a href="https://youtu.be/hV0jOnzFcdI?si=VOCYdYhFcp6bbert">
+    <img src="https://img.icons8.com/fluency/48/000000/play.png" alt="Play Video">
+  </a>
+  <br>
+  <i>Play the Demo</i>
+</div>
+
+
+
 ## 📚 Table of Contents
 
 1. [Features](#-features)
