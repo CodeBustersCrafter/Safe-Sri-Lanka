@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-const BASE_URL = 'http://192.168.1.2';
+const BASE_URL = 'ADD YOUR IP HERE(Refer README.md)';
 
 const SOS_PORT = 9000;
 const UNCOMFORTABLE_PORT = 9001;

@@ -1,6 +1,5 @@
 import ballerina/http;
 import ballerina/mime;
-import ballerina/os;
 import ballerina/log;
 import safe_srilanka.dangerZoneController as dangerZoneController;
 import safe_srilanka.SOSController as sosController;
@@ -19,8 +18,9 @@ const int TRACE_PORT = 9004;
 const int DANGER_ZONE_PORT = 9005;
 const int IMAGES_PORT = 9006;
 const int RELATIONSHIP_PORT = 9007;
-// Use environment variable for backend IP
-string backendIp = os:getEnv("BACKEND_IP");
+
+// Define backend IP
+const string backendIp = "ADD YOUR IP HERE(Refer README.md)";
 
 // Create HTTP listeners
 listener http:Listener sosListener = new(SOS_PORT, config = {
