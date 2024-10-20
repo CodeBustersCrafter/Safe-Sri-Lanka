@@ -175,42 +175,6 @@ Note:
 
 Make sure your device/emulator and development machine are on the same network for the app to communicate with the backend properly.
 
-
-## 📱 Usage
-
-Access the app via the Expo Go app or emulator. Use the interface to:
-- Send SOS alerts in emergency situations
-- Access helplines for various support services
-- Simulate fake calls for safety purposes
-- Track your location in real-time
-- Manage trusted relationships and emergency contacts
-- View existing danger zones and report new ones
-- Chat with an AI assistant for information and guidance
-- Access legal, mental health, and self-defense resources
-   
-## 🔌 API Endpoints
-
-The application provides several API endpoints for various functionalities:
-
-1. Profile Management:
-   - GET /safe_srilanka/database/profile
-   - POST /safe_srilanka/database/profile
-
-2. SOS and Uncomfortable Signals:
-   - POST /safe_srilanka/database/sos
-   - POST /safe_srilanka/database/uncomfortable
-
-3. Location Tracking:
-   - POST /safe_srilanka/database/trace
-
-4. Danger Zone Management:
-   - POST /safe_srilanka/database/dangerzone
-
-5. Relationship Management:
-   - POST /safe_srilanka/database/relationship
-
-For detailed API documentation, refer to the individual controller modules in the `api/safe-srilanka/modules/` directory.
-
 ## 🐛 Troubleshooting
    If you encounter any issues:
    
