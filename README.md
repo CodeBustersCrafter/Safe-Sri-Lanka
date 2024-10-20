@@ -11,7 +11,7 @@ Safe-Sri-Lanka is a comprehensive mobile application specially developed for wom
     <img src="https://img.icons8.com/color/48/000000/youtube-play.png" alt="Play Video">
   </a>
   <br>
-  <i>Play the Demo</i>
+  <i>Watch the Safe-Sri-Lanka Demo Video</i>
 </div>
 
 
