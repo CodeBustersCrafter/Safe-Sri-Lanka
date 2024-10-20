@@ -1,6 +1,6 @@
 # Safe-Sri-Lanka
 
-Safe-Sri-Lanka is a mobile application designed to enhance safety and security for residents and visitors in Sri Lanka. The app features an SOS button for emergency situations, real-time location tracking, and access to helplines.
+Safe-Sri-Lanka is a comprehensive mobile application specially developed for women's safety, designed to enhance security for female residents and visitors in Sri Lanka. The app features an SOS button for emergency situations, real-time location tracking, access to helplines, and an AI-powered chatbot for intelligent assistance. With additional features like danger zone alerts and relationship management, Safe-Sri-Lanka aims to provide women with peace of mind and immediate support when needed. This user-friendly interface empowers people to navigate their surroundings with confidence and access help quickly in potentially unsafe situations.
 
 ## 📚 Table of Contents
 
@@ -104,17 +104,38 @@ Note:
    - On iOS Simulator (macOS only): Press `i` in the terminal.
    - Using Expo Go App: Open the Expo Go app and scan the QR code displayed in the terminal.
 
+4. Python Servers (Not Required already deployed in AWS):
+   All Python servers have been deployed on our AWS server, so you don't need to worry about running them locally. However, if you need to run and test them:
+
+   - Request the `.env` file from us by emailing teamcognic.ai@gmail.com
+   - To run the chatbot part:
+     ```bash
+     python "Python_backend/Chatbots/main_chatbot.py"
+     ```
+   - To run the call server:
+     ```bash
+     python "Python_backend/Call and sms services/call_server.py"
+     ```
+   - For the call server, you also need to:
+     1. Download and install ngrok
+     2. In the ngrok terminal, run: `ngrok http 5000`
+     3. Take the public forwarding URL provided by ngrok
+     4. Replace the `server_address` in the `call.py` file with this URL for smooth integration
+
 Make sure your device/emulator and development machine are on the same network for the app to communicate with the backend properly.
+
 
 ## 📱 Usage
 
 Access the app via the Expo Go app or emulator. Use the interface to:
-- Send SOS alerts
-- Access helplines
-- Simulate fake calls
-- Track your location
-- Manage relationships
-- View and report danger zones
+- Send SOS alerts in emergency situations
+- Access helplines for various support services
+- Simulate fake calls for safety purposes
+- Track your location in real-time
+- Manage trusted relationships and emergency contacts
+- View existing danger zones and report new ones
+- Chat with an AI assistant for information and guidance
+- Access legal, mental health, and self-defense resources
    
 ## 🔌 API Endpoints
 
