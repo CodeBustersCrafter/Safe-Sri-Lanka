@@ -23,11 +23,9 @@ Safe-Sri-Lanka is a comprehensive mobile application specially developed for wom
 4. [Database Setup](#️-database-setup)
 5. [Network Configuration](#-network-configuration)
 6. [Running the Application](#-running-the-application)
-7. [Usage](#-usage)
-8. [API Endpoints](#-api-endpoints)
-9. [Troubleshooting](#-troubleshooting)
-10. [Contributing](#-contributing)
-11. [License](#-license)
+7. [Troubleshooting](#-troubleshooting)
+8. [Contributing](#-contributing)
+9. [License](#-license)
 
 ## 🛠 Features
 
