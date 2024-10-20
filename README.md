@@ -17,7 +17,6 @@ Safe-Sri-Lanka is a comprehensive mobile application specially developed for wom
 11. [License](#-license)
 
 ## 🛠 Features
-
 - **SOS Button:** Instantly send your location and alert emergency contacts.
 - **Real-Time Location Tracking:** Monitor your whereabouts in real-time.
 - **AI Chatbot:** Get instant assistance through an agentic, RAG-based implementation that provides intelligent and context-aware support.
